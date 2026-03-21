@@ -1,0 +1,8 @@
+# HTTP requests (used for writing to InfluxDB 3)
+requests>=2.31.0
+
+# Optional: if you prefer official InfluxDB 3 client
+influxdb3-python>=0.4.0
+
+# Serial communication (only if you read from UART/USB later)
+pyserial>=3.5

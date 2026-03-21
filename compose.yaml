@@ -1,0 +1,48 @@
+services:
+  influxdb:
+    image: influxdb:3-core
+    container_name: telemetry-influxdb3
+    ports:
+      - "8181:8181"
+    env_file:
+      - .env
+    command:
+      - influxdb3
+      - serve
+      - --object-store=file
+      - --data-dir=/var/lib/influxdb3
+      - --node-id-from-env=NODE_ID
+    volumes:
+      - ./data/influxdb3:/var/lib/influxdb3
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: telemetry-grafana
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+    volumes:
+      - ./data/grafana:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - influxdb
+    restart: unless-stopped
+
+  python-server:
+    build: ./python-server
+    container_name: telemetry-python-server
+    ports:
+      - "8080:8080/udp"
+    env_file:
+      - .env
+    environment:
+      INFLUX_URL: http://influxdb:8181
+    depends_on:
+      - influxdb
+    restart: unless-stopped

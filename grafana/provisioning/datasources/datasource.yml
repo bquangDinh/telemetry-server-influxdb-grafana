@@ -1,0 +1,16 @@
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB3
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8181
+    isDefault: true
+    jsonData:
+      version: InfluxQL
+      dbName: telemetry
+      httpHeaderName1: Authorization
+      withCredentials: true
+      
+    secureJsonData:
+      httpHeaderValue1: "Bearer ${INFLUX_TOKEN}"
