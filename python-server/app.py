@@ -63,7 +63,7 @@ class DecodedMessage:
 
 class PacketDecoder:
     MIN_PACKET_SIZE = 9
-
+    
     @staticmethod
     def decode(data: bytes) -> DecodedMessage:
         if len(data) < PacketDecoder.MIN_PACKET_SIZE:
@@ -118,10 +118,12 @@ class InfluxWriter:
         point = (
             Point("temperature")
             .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", f"{"wifi" if msg.message_type == 0 else "cellular"}")
             .field("value_c", temperature_c)
         )
 
         self._client.write(point)
+        
         print(
             f"[InfluxDB] Wrote temperature: id=0x{msg.message_id:08X}, "
             f"value={temperature_c:.2f} C"
@@ -153,13 +155,83 @@ class UdpServer:
 # =========================
 
 class TelemetryApp:
-    TEMPERATURE_MESSAGE_ID = 0x00000001
+    TELEMETRY_NODE_1_TEMP_1 = 0x11
+    TELEMETRY_NODE_1_TEMP_2 = 0x12
 
+    DRIVER_CTR_MAIN_HV_SW = 0x2000004
+    DRIVER_CTR_MOTOR_HV_SW = 0x2000104
+    DRIVER_CTR_MPPT_HV_SW = 0x2000204
+    DRIVER_CTR_MOTOR_FR_SW = 0x2000304
+    DRIVER_CTR_MOTOR_PE_SW = 0x2000404
+    DRIVER_CTR_SERVICE_BR_SW = 0x4000504
+    DRIVER_CTR_PARKING_BR_SW = 0x4000604
+    DRIVER_CTR_RIGHT_TURN_SW = 0x4000704
+    DRIVER_CTR_LEFT_TURN_SW = 0x4000804
+    
+    REAR_CTRL_MOTOR_RPM = 0x8000008
+    REAR_CTRL_VEHICLE_SPEED = 0x4000108
+    REAR_CTRL_ARR_VOL_1 = 0xA006408
+    REAR_CTRL_ARR_CUR_1 = 0xA006508
+    REAR_CTRL_BAT_MEAS_1 = 0xA006608
+    REAR_CTRL_MPPT_TEMP_1 = 0xA006708
+    REAR_CTRL_ARR_VOL_2 = 0xA00C808
+    REAR_CTRL_ARR_CUR_2 = 0xA00C908
+    REAR_CTRL_BAT_MEAS_2 = 0xA00CA08
+    REAR_CTRL_MPPT_TEMP_2 = 0xA00CB08
+    REAR_CTRL_ARR_VOL_3 = 0xA012C08
+    REAR_CTRL_ARR_CUR_3 = 0xA012D08
+    REAR_CTRL_BAT_MEAS_3 = 0xA012E08
+    REAR_CTRL_MPPT_TEMP_3 = 0xA012F08
+    REAR_CTRL_ARR_VOL_4 = 0xA019008
+    REAR_CTRL_ARR_CUR_4 = 0xA019108
+    REAR_CTRL_BAT_MEAS_4 = 0xA019208
+    REAR_CTRL_MPPT_TEMP_4 = 0xA019308
+    
+    LV_BPS_BAT_VOL = 0x6000110
+    LV_BPS_BAT_CUR = 0x6000210
+    LV_BPS_SYS_CUR = 0x6000310
+    LV_BPS_BAT_TEMP = 0x6000410
+    
+    HV_BPS_FAULT_FLAGS = 0x400010C
+    HV_BPS_MAIN_CONTACTOR_STATUS = 0x800020C
+    HV_BPS_MOTOR_CONTACTOR_STATUS = 0x800030C
+    HV_BPS_MPPT_CONTACTOR_STATUS = 0x800040C
+    HV_BPS_BAT_VOL = 0x600050C
+    HV_BPS_BAT_CUR = 0x600060C
+    HV_BPS_BAT_AVG_TEMP = 0x600070C
+    HV_BPS_BAT_MAX_TEMP = 0x600080C
+    HV_BPS_BAT_SOC = 0x600090C
+    HV_BPS_MOD_VOL_1 = 0xC00640C
+    HV_BPS_MOD_VOL_2 = 0xC00650C
+    HV_BPS_MOD_VOL_3 = 0xC00660C
+    HV_BPS_MOD_VOL_4 = 0xC00670C
+    HV_BPS_MOD_VOL_5 = 0xC00680C
+    HV_BPS_MOD_VOL_6 = 0xC00690C
+    HV_BPS_MOD_VOL_7 = 0xC006A0C
+    HV_BPS_MOD_VOL_8 = 0xC006B0C
+    HV_BPS_MOD_VOL_9 = 0xC006C0C
+    HV_BPS_MOD_VOL_10 = 0xC006D0C
+    HV_BPS_MOD_VOL_11 = 0xC006E0C
+    HV_BPS_MOD_VOL_12 = 0xC006F0C
+    HV_BPS_MOD_VOL_13 = 0xC00700C
+    HV_BPS_MOD_VOL_14 = 0xC00710C
+    HV_BPS_MOD_VOL_15 = 0xC00720C
+    HV_BPS_MOD_VOL_16 = 0xC00730C
+    HV_BPS_MOD_VOL_17 = 0xC00740C
+    HV_BPS_MOD_VOL_18 = 0xC00750C
+    HV_BPS_MOD_VOL_19 = 0xC00760C
+    HV_BPS_MOD_VOL_20 = 0xC00770C
+    HV_BPS_MOD_VOL_21 = 0xC00780C
+    HV_BPS_MOD_VOL_22 = 0xC00790C
+    HV_BPS_MOD_VOL_23 = 0xC007A0C
+    HV_BPS_MOD_VOL_24 = 0xC007B0C
+    
     def __init__(self, udp_server: UdpServer, influx_writer: InfluxWriter) -> None:
         self._udp_server = udp_server
         self._influx_writer = influx_writer
         self._handlers: Dict[int, Callable[[DecodedMessage], None]] = {
-            self.TEMPERATURE_MESSAGE_ID: self._handle_temperature,
+            self.TELEMETRY_NODE_1_TEMP_1: self._handle_temperature,
+            self.TELEMETRY_NODE_1_TEMP_2: self._handle_temperature,
         }
 
     def run(self) -> None:
@@ -199,7 +271,198 @@ class TelemetryApp:
         temperature_c = PacketDecoder.decode_temperature(msg)
         print(f"[Telemetry] Temperature: {temperature_c:.2f} C")
         self._influx_writer.write_temperature(msg, temperature_c)
+        
+    def _handle_dr_ctrl_main_hv_sw(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for driver control main HV switch
+    
+    def _handle_dr_ctrl_motor_hv_sw(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for driver control motor HV switch
+    
+    def _handle_dr_ctrl_mppt_hv_sw(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for driver control MPPT HV switch
+    
+    def _handle_dr_ctrl_motor_fr_sw(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for driver control motor forward/reverse switch    
+    
+    def _handle_dr_ctrl_motor_pe_sw(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for driver control motor power/enable switch
+    
+    def _handle_dr_ctrl_service_br_sw(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for driver control service brake switch
+    
+    def _handle_dr_ctrl_parking_br_sw(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for driver control parking brake switch
+    
+    def _handle_dr_ctrl_right_turn_sw(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for driver control right turn switch
+    
+    def _handle_dr_ctrl_left_turn_sw(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for driver control left turn switch
+    
+    def _handle_rear_ctrl_motor_rpm(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control motor RPM
+    
+    def _handle_rear_ctrl_vehicle_speed(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control vehicle speed
+    
+    def _handle_rear_ctrl_arr_vol_1(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control array voltage 1
+    
+    def _handle_rear_ctrl_arr_cur_1(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control array current 1
+    
+    def _handle_rear_ctrl_bat_meas_1(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control battery measurement 1
+    
+    def _handle_rear_ctrl_mppt_temp_1(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control MPPT temperature 1
+    
+    def _handle_rear_ctrl_arr_vol_2(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control array voltage 2
+    
+    def _handle_rear_ctrl_arr_cur_2(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control array current 2
+    
+    def _handle_rear_ctrl_bat_meas_2(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control battery measurement 2
+    
+    def _handle_rear_ctrl_mppt_temp_2(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control MPPT temperature 2
+    
+    def _handle_rear_ctrl_arr_vol_3(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control array voltage 3
+    
+    def _handle_rear_ctrl_arr_cur_3(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control array current 3
+    
+    def _handle_rear_ctrl_bat_meas_3(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control battery measurement 3
+    
+    def _handle_rear_ctrl_mppt_temp_3(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control MPPT temperature 3
+    
+    def _handle_rear_ctrl_arr_vol_4(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control array voltage 4
+    
+    def _handle_rear_ctrl_arr_cur_4(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control array current 4
+    
+    def _handle_rear_ctrl_bat_meas_4(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control battery measurement 4
+    
+    def _handle_rear_ctrl_mppt_temp_4(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for rear control MPPT temperature 4
+    
+    def _handle_lv_bps_bat_vol(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for LV BPS battery voltage
+    
+    def _handle_lv_bps_bat_cur(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for LV BPS battery current
+    
+    def _handle_lv_bps_sys_cur(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for LV BPS system current
+    
+    def _handle_lv_bps_bat_temp(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for LV BPS battery temperature
+    
+    def _handle_hv_bps_fault_flags(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS fault flags
+    
+    def _handle_hv_bps_main_contactor_status(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS main contactor status
+    
+    def _handle_hv_bps_motor_contactor_status(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS motor contactor status
+    
+    def _handle_hv_bps_mppt_contactor_status(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS MPPT contactor status
+    
+    def _handle_hv_bps_bat_vol(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS battery voltage
+    
+    def _handle_hv_bps_bat_cur(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS battery current
+    
+    def _handle_hv_bps_bat_avg_temp(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS battery average temperature
+    
+    def _handle_hv_bps_bat_max_temp(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS battery maximum temperature
+    
+    def _handle_hv_bps_bat_soc(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS battery state of charge
+    
+    def _handle_hv_bps_mod_vol_1(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 1
 
+    def _handle_hv_bps_mod_vol_2(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 2
+    
+    def _handle_hv_bps_mod_vol_3(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 3
+    
+    def _handle_hv_bps_mod_vol_4(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 4
+    
+    def _handle_hv_bps_mod_vol_5(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 5
+    
+    def _handle_hv_bps_mod_vol_6(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 6
+    
+    def _handle_hv_bps_mod_vol_7(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 7
+    
+    def _handle_hv_bps_mod_vol_8(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 8
+    
+    def _handle_hv_bps_mod_vol_9(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 9
+    
+    def _handle_hv_bps_mod_vol_10(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 10
+    
+    def _handle_hv_bps_mod_vol_11(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 11
+    
+    def _handle_hv_bps_mod_vol_12(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 12
+    
+    def _handle_hv_bps_mod_vol_13(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 13
+    
+    def _handle_hv_bps_mod_vol_14(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 14
+    
+    def _handle_hv_bps_mod_vol_15(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 15
+    
+    def _handle_hv_bps_mod_vol_16(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 16
+    
+    def _handle_hv_bps_mod_vol_17(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 17
+    
+    def _handle_hv_bps_mod_vol_18(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 18
+    
+    def _handle_hv_bps_mod_vol_19(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 19
+    
+    def _handle_hv_bps_mod_vol_20(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 20
+    
+    def _handle_hv_bps_mod_vol_21(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 21
+    
+    def _handle_hv_bps_mod_vol_22(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 22
+    
+    def _handle_hv_bps_mod_vol_23(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 23
+    
+    def _handle_hv_bps_mod_vol_24(self, msg: DecodedMessage) -> None:
+        pass  # TODO: implement handling for HV BPS module voltage 24
 
 # =========================
 # Entry Point
