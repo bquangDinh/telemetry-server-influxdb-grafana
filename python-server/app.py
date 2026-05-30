@@ -128,6 +128,81 @@ class InfluxWriter:
             f"[InfluxDB] Wrote temperature: id=0x{msg.message_id:08X}, "
             f"value={temperature_c:.2f} C"
         )
+        
+    def write_soc(self, msg: DecodedMessage, soc_percent: float) -> None:
+        point = (
+            Point("battery_soc")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", f"{"wifi" if msg.message_type == 0 else "cellular"}")
+            .field("value_percent", soc_percent)
+        )
+
+        self._client.write(point)
+        
+        print(
+            f"[InfluxDB] Wrote battery state of charge: id=0x{msg.message_id:08X}, "
+            f"value={soc_percent:.2f} %"
+        )
+
+    def write_bat_avg_temp(self, msg: DecodedMessage, avg_temp_c: float) -> None:
+        point = (
+            Point("battery_avg_temp")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", f"{"wifi" if msg.message_type == 0 else "cellular"}")
+            .field("value_c", avg_temp_c)
+        )
+
+        self._client.write(point)
+        
+        print(
+            f"[InfluxDB] Wrote battery average temperature: id=0x{msg.message_id:08X}, "
+            f"value={avg_temp_c:.2f} C"
+        )
+        
+    def write_bat_max_temp(self, msg: DecodedMessage, max_temp_c: float) -> None:
+        point = (
+            Point("battery_max_temp")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", f"{"wifi" if msg.message_type == 0 else "cellular"}")
+            .field("value_c", max_temp_c)
+        )
+
+        self._client.write(point)
+        
+        print(
+            f"[InfluxDB] Wrote battery max temperature: id=0x{msg.message_id:08X}, "
+            f"value={max_temp_c:.2f} C"
+        )
+        
+    def write_bat_pack_voltage(self, msg: DecodedMessage, voltage_v: float) -> None:
+        point = (
+            Point("battery_pack_voltage")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", f"{"wifi" if msg.message_type == 0 else "cellular"}")
+            .field("value_v", voltage_v)
+        )
+
+        self._client.write(point)
+        
+        print(
+            f"[InfluxDB] Wrote battery pack voltage: id=0x{msg.message_id:08X}, "
+            f"value={voltage_v:.2f} V"
+        )
+        
+    def write_bat_pack_current(self, msg: DecodedMessage, current_a: float) -> None:
+        point = (
+            Point("battery_pack_current")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", f"{"wifi" if msg.message_type == 0 else "cellular"}")
+            .field("value_a", current_a)
+        )
+
+        self._client.write(point)
+        
+        print(
+            f"[InfluxDB] Wrote battery pack current: id=0x{msg.message_id:08X}, "
+            f"value={current_a:.2f} A"
+        )
 
 
 # =========================
@@ -378,19 +453,44 @@ class TelemetryApp:
         pass  # TODO: implement handling for HV BPS MPPT contactor status
     
     def _handle_hv_bps_bat_vol(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS battery voltage
+        bat_pack_voltage = struct.unpack('<I', msg.payload[:4])[0]
+        
+        # Multiple by 0.1 mV to convert to volts
+        bat_pack_voltage_volts = bat_pack_voltage * 0.0001
+        
+        print(f"[Telemetry] HV BPS Battery Pack Voltage: {bat_pack_voltage_volts:.2f} V")
+        
+        self._influx_writer.write_bat_pack_voltage(msg, bat_pack_voltage_volts)
     
     def _handle_hv_bps_bat_cur(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS battery current
+        bat_current = struct.unpack('<i', msg.payload[:4])[0]
+        
+        print(f"[Telemetry] HV BPS Battery Current: {bat_current:.2f} A")
+        
+        self._influx_writer.write_bat_pack_current(msg, bat_current)
     
     def _handle_hv_bps_bat_avg_temp(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS battery average temperature
-    
+        bat_avg_temp = struct.unpack('<I', msg.payload[:4])[0]
+        
+        print(f"[Telemetry] HV BPS Battery Average Temperature: {bat_avg_temp} C")
+        
+        self._influx_writer.write_bat_avg_temp(msg, bat_avg_temp)
+        
     def _handle_hv_bps_bat_max_temp(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS battery maximum temperature
-    
+        bat_max_temp = struct.unpack('<I', msg.payload[:4])[0]
+        
+        print(f"[Telemetry] HV BPS Battery Max Temperature: {bat_max_temp} C")
+        
+        self._influx_writer.write_bat_max_temp(msg, bat_max_temp)
+
     def _handle_hv_bps_bat_soc(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS battery state of charge
+        # Assemble the first 4-bytes of the payload into a uint32
+        bat_soc = struct.unpack('<I', msg.payload[:4])[0]
+        
+        # bat_soc is percentage in range of 0 to 100
+        print(f"[Telemetry] HV BPS Battery State of Charge: {bat_soc} %")
+        
+        self._influx_writer.write_soc(msg, bat_soc)
     
     def _handle_hv_bps_mod_vol_1(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for HV BPS module voltage 1
