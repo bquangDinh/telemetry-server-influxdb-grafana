@@ -181,11 +181,6 @@
                       ],
                       "tags": [
                         {
-                          "key": "message_id",
-                          "operator": "=",
-                          "value": "0xC00640C"
-                        },
-                        {
                           "condition": "AND",
                           "key": "message_type",
                           "operator": "=",
@@ -206,7 +201,7 @@
         "description": "",
         "id": 10,
         "links": [],
-        "title": "Battery Voltage Module 1",
+        "title": "Battery Voltage Module 1-24",
         "vizConfig": {
           "group": "timeseries",
           "kind": "VizConfig",
