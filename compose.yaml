@@ -51,7 +51,7 @@ services:
     build: ./python-notecard-proxy
     container_name: telemetry-python-notecard-proxy
     ports:
-      - "5000:5000/tcp"
+      - "8082:8082/tcp"
     env_file:
       - .env
     restart: unless-stopped

@@ -63,7 +63,6 @@ class DecodedMessage:
 
 class PacketDecoder:
     MIN_PACKET_SIZE = 9
-    
     @staticmethod
     def decode(data: bytes) -> DecodedMessage:
         if len(data) < PacketDecoder.MIN_PACKET_SIZE:
@@ -118,27 +117,27 @@ class InfluxWriter:
         point = (
             Point("temperature")
             .tag("message_id", f"0x{msg.message_id:08X}")
-            .tag("message_type", f"{"wifi" if msg.message_type == 0 else "cellular"}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
             .field("value_c", temperature_c)
         )
 
         self._client.write(point)
-        
+
         print(
             f"[InfluxDB] Wrote temperature: id=0x{msg.message_id:08X}, "
             f"value={temperature_c:.2f} C"
         )
-        
+
     def write_soc(self, msg: DecodedMessage, soc_percent: float) -> None:
         point = (
             Point("battery_soc")
             .tag("message_id", f"0x{msg.message_id:08X}")
-            .tag("message_type", f"{"wifi" if msg.message_type == 0 else "cellular"}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
             .field("value_percent", soc_percent)
         )
 
         self._client.write(point)
-        
+
         print(
             f"[InfluxDB] Wrote battery state of charge: id=0x{msg.message_id:08X}, "
             f"value={soc_percent:.2f} %"
@@ -148,61 +147,125 @@ class InfluxWriter:
         point = (
             Point("battery_avg_temp")
             .tag("message_id", f"0x{msg.message_id:08X}")
-            .tag("message_type", f"{"wifi" if msg.message_type == 0 else "cellular"}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
             .field("value_c", avg_temp_c)
         )
 
         self._client.write(point)
-        
+
         print(
             f"[InfluxDB] Wrote battery average temperature: id=0x{msg.message_id:08X}, "
             f"value={avg_temp_c:.2f} C"
         )
-        
+
     def write_bat_max_temp(self, msg: DecodedMessage, max_temp_c: float) -> None:
         point = (
             Point("battery_max_temp")
             .tag("message_id", f"0x{msg.message_id:08X}")
-            .tag("message_type", f"{"wifi" if msg.message_type == 0 else "cellular"}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
             .field("value_c", max_temp_c)
         )
 
         self._client.write(point)
-        
+
         print(
             f"[InfluxDB] Wrote battery max temperature: id=0x{msg.message_id:08X}, "
             f"value={max_temp_c:.2f} C"
         )
-        
+
     def write_bat_pack_voltage(self, msg: DecodedMessage, voltage_v: float) -> None:
         point = (
             Point("battery_pack_voltage")
             .tag("message_id", f"0x{msg.message_id:08X}")
-            .tag("message_type", f"{"wifi" if msg.message_type == 0 else "cellular"}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
             .field("value_v", voltage_v)
         )
 
         self._client.write(point)
-        
+
         print(
             f"[InfluxDB] Wrote battery pack voltage: id=0x{msg.message_id:08X}, "
             f"value={voltage_v:.2f} V"
         )
-        
+
     def write_bat_pack_current(self, msg: DecodedMessage, current_a: float) -> None:
         point = (
             Point("battery_pack_current")
             .tag("message_id", f"0x{msg.message_id:08X}")
-            .tag("message_type", f"{"wifi" if msg.message_type == 0 else "cellular"}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
             .field("value_a", current_a)
         )
 
         self._client.write(point)
-        
+
         print(
             f"[InfluxDB] Wrote battery pack current: id=0x{msg.message_id:08X}, "
             f"value={current_a:.2f} A"
         )
+
+    def write_bat_vol_module(self, msg: DecodedMessage, module_num: int, voltage_v: float) -> None:
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("module", module_num)
+            .field("value_v", voltage_v)
+        )
+
+        self._client.write(point)
+
+        print(
+            f"[InfluxDB] Wrote battery voltage module {module_num}: id=0x{msg.message_id:08X}, "
+            f"value={voltage_v:.2f} V"
+        )
+
+    def write_bat_hv_fault(self, msg: DecodedMessage, fault_flags: int) -> None:
+        point = (
+            Point("battery_hv_fault")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", fault_flags)
+        )
+
+        self._client.write(point)
+
+        print(
+            f"[InfluxDB] Wrote battery HV fault flags: id=0x{msg.message_id:08X}, "
+            f"value={fault_flags}"
+        )
+
+    def write_bat_hv_main_contractor(self, msg: DecodedMessage, main_contractor: int) -> None:
+        point = (
+            Point("battery_hv_main_contractor")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", main_contractor)
+        )
+
+        self._client.write(point)
+
+        print(
+            f"[InfluxDB] Wrote battery HV main contactor status: id=0x{msg.message_id:08X}, "
+            f"value={main_contractor}"
+        )
+
+    def write_bat_hv_motor_contractor(self, msg: DecodedMessage, motor_contractor: int) -> None:
+        point = (
+            Point("battery_hv_motor_contractor")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", motor_contractor)
+        )
+
+        self._client.write(point)
+
+        print(
+            f"[InfluxDB] Wrote battery HV motor contactor status: id=0x{msg.message_id:08X}, "
+            f"value={motor_contractor}"
+        )
+
+    def write_datapoint(self, point: Point):
+        self._client.write(point)
 
 
 # =========================
@@ -242,7 +305,7 @@ class TelemetryApp:
     DRIVER_CTR_PARKING_BR_SW = 0x4000604
     DRIVER_CTR_RIGHT_TURN_SW = 0x4000704
     DRIVER_CTR_LEFT_TURN_SW = 0x4000804
-    
+
     REAR_CTRL_MOTOR_RPM = 0x8000008
     REAR_CTRL_VEHICLE_SPEED = 0x4000108
     REAR_CTRL_ARR_VOL_1 = 0xA006408
@@ -261,12 +324,12 @@ class TelemetryApp:
     REAR_CTRL_ARR_CUR_4 = 0xA019108
     REAR_CTRL_BAT_MEAS_4 = 0xA019208
     REAR_CTRL_MPPT_TEMP_4 = 0xA019308
-    
+
     LV_BPS_BAT_VOL = 0x6000110
     LV_BPS_BAT_CUR = 0x6000210
     LV_BPS_SYS_CUR = 0x6000310
     LV_BPS_BAT_TEMP = 0x6000410
-    
+
     HV_BPS_FAULT_FLAGS = 0x400010C
     HV_BPS_MAIN_CONTACTOR_STATUS = 0x800020C
     HV_BPS_MOTOR_CONTACTOR_STATUS = 0x800030C
@@ -274,7 +337,7 @@ class TelemetryApp:
     HV_BPS_BAT_VOL = 0x600050C
     HV_BPS_BAT_CUR = 0x600060C
     HV_BPS_BAT_AVG_TEMP = 0x600070C
-    HV_BPS_BAT_MAX_TEMP = 0x600080C
+    HV_BPS_BAT_MAXB_TEMP = 0x600080C
     HV_BPS_BAT_SOC = 0x600090C
     HV_BPS_MOD_VOL_1 = 0xC00640C
     HV_BPS_MOD_VOL_2 = 0xC00650C
@@ -300,13 +363,77 @@ class TelemetryApp:
     HV_BPS_MOD_VOL_22 = 0xC00790C
     HV_BPS_MOD_VOL_23 = 0xC007A0C
     HV_BPS_MOD_VOL_24 = 0xC007B0C
-    
+
     def __init__(self, udp_server: UdpServer, influx_writer: InfluxWriter) -> None:
         self._udp_server = udp_server
         self._influx_writer = influx_writer
         self._handlers: Dict[int, Callable[[DecodedMessage], None]] = {
             self.TELEMETRY_NODE_1_TEMP_1: self._handle_temperature,
             self.TELEMETRY_NODE_1_TEMP_2: self._handle_temperature,
+            self.DRIVER_CTR_MAIN_HV_SW: self._handle_dr_ctrl_main_hv_sw,
+            self.DRIVER_CTR_MOTOR_HV_SW: self._handle_dr_ctrl_motor_hv_sw,
+            self.DRIVER_CTR_MPPT_HV_SW: self._handle_dr_ctrl_mppt_hv_sw,
+            self.DRIVER_CTR_MOTOR_FR_SW: self._handle_dr_ctrl_motor_fr_sw,
+            self.DRIVER_CTR_MOTOR_PE_SW: self._handle_dr_ctrl_motor_pe_sw,
+            self.DRIVER_CTR_SERVICE_BR_SW: self._handle_dr_ctrl_service_br_sw,
+            self.DRIVER_CTR_PARKING_BR_SW: self._handle_dr_ctrl_parking_br_sw,
+            self.DRIVER_CTR_RIGHT_TURN_SW: self._handle_dr_ctrl_right_turn_sw,
+            self.DRIVER_CTR_LEFT_TURN_SW: self._handle_dr_ctrl_left_turn_sw,
+            self.REAR_CTRL_MOTOR_RPM: self._handle_rear_ctrl_motor_rpm,
+            self.REAR_CTRL_VEHICLE_SPEED: self._handle_rear_ctrl_vehicle_speed,
+            self.REAR_CTRL_ARR_VOL_1: self._handle_rear_ctrl_arr_vol_1,
+            self.REAR_CTRL_ARR_CUR_1: self._handle_rear_ctrl_arr_cur_1,
+            self.REAR_CTRL_BAT_MEAS_1: self._handle_rear_ctrl_bat_meas_1,
+            self.REAR_CTRL_MPPT_TEMP_1: self._handle_rear_ctrl_mppt_temp_1,
+            self.REAR_CTRL_ARR_VOL_2: self._handle_rear_ctrl_arr_vol_2,
+            self.REAR_CTRL_ARR_CUR_2: self._handle_rear_ctrl_arr_cur_2,
+            self.REAR_CTRL_BAT_MEAS_2: self._handle_rear_ctrl_bat_meas_2,
+            self.REAR_CTRL_MPPT_TEMP_2: self._handle_rear_ctrl_mppt_temp_2,
+            self.REAR_CTRL_ARR_VOL_3: self._handle_rear_ctrl_arr_vol_3,
+            self.REAR_CTRL_ARR_CUR_3: self._handle_rear_ctrl_arr_cur_3,
+            self.REAR_CTRL_BAT_MEAS_3: self._handle_rear_ctrl_bat_meas_3,
+            self.REAR_CTRL_MPPT_TEMP_3: self._handle_rear_ctrl_mppt_temp_3,
+            self.REAR_CTRL_ARR_VOL_4: self._handle_rear_ctrl_arr_vol_4,
+            self.REAR_CTRL_ARR_CUR_4: self._handle_rear_ctrl_arr_cur_4,
+            self.REAR_CTRL_BAT_MEAS_4: self._handle_rear_ctrl_bat_meas_4,
+            self.REAR_CTRL_MPPT_TEMP_4: self._handle_rear_ctrl_mppt_temp_4,
+            self.LV_BPS_BAT_VOL: self._handle_lv_bps_bat_vol,
+            self.LV_BPS_BAT_CUR: self._handle_lv_bps_bat_cur,
+            self.LV_BPS_SYS_CUR: self._handle_lv_bps_sys_cur,
+            self.LV_BPS_BAT_TEMP: self._handle_lv_bps_bat_temp,
+            self.HV_BPS_FAULT_FLAGS: self._handle_hv_bps_fault_flags,
+            self.HV_BPS_MAIN_CONTACTOR_STATUS: self._handle_hv_bps_main_contactor_status,
+            self.HV_BPS_MOTOR_CONTACTOR_STATUS: self._handle_hv_bps_motor_contactor_status,
+            self.HV_BPS_MPPT_CONTACTOR_STATUS: self._handle_hv_bps_mppt_contactor_status,
+            self.HV_BPS_BAT_VOL: self._handle_hv_bps_bat_vol,
+            self.HV_BPS_BAT_CUR: self._handle_hv_bps_bat_cur,
+            self.HV_BPS_BAT_AVG_TEMP: self._handle_hv_bps_bat_avg_temp,
+            self.HV_BPS_BAT_MAX_TEMP: self._handle_hv_bps_bat_max_temp,
+            self.HV_BPS_BAT_SOC: self._handle_hv_bps_bat_soc,
+            self.HV_BPS_MOD_VOL_1: self._handle_hv_bps_mod_vol_1,
+            self.HV_BPS_MOD_VOL_2: self._handle_hv_bps_mod_vol_2,
+            self.HV_BPS_MOD_VOL_3: self._handle_hv_bps_mod_vol_3,
+            self.HV_BPS_MOD_VOL_4: self._handle_hv_bps_mod_vol_4,
+            self.HV_BPS_MOD_VOL_5: self._handle_hv_bps_mod_vol_5,
+            self.HV_BPS_MOD_VOL_6: self._handle_hv_bps_mod_vol_6,
+            self.HV_BPS_MOD_VOL_7: self._handle_hv_bps_mod_vol_7,
+            self.HV_BPS_MOD_VOL_8: self._handle_hv_bps_mod_vol_8,
+            self.HV_BPS_MOD_VOL_9: self._handle_hv_bps_mod_vol_9,
+            self.HV_BPS_MOD_VOL_10: self._handle_hv_bps_mod_vol_10,
+            self.HV_BPS_MOD_VOL_11: self._handle_hv_bps_mod_vol_11,
+            self.HV_BPS_MOD_VOL_12: self._handle_hv_bps_mod_vol_12,
+            self.HV_BPS_MOD_VOL_13: self._handle_hv_bps_mod_vol_13,
+            self.HV_BPS_MOD_VOL_14: self._handle_hv_bps_mod_vol_14,
+            self.HV_BPS_MOD_VOL_15: self._handle_hv_bps_mod_vol_15,
+            self.HV_BPS_MOD_VOL_16: self._handle_hv_bps_mod_vol_16,
+            self.HV_BPS_MOD_VOL_17: self._handle_hv_bps_mod_vol_17,
+            self.HV_BPS_MOD_VOL_18: self._handle_hv_bps_mod_vol_18,
+            self.HV_BPS_MOD_VOL_19: self._handle_hv_bps_mod_vol_19,
+            self.HV_BPS_MOD_VOL_20: self._handle_hv_bps_mod_vol_20,
+            self.HV_BPS_MOD_VOL_21: self._handle_hv_bps_mod_vol_21,
+            self.HV_BPS_MOD_VOL_22: self._handle_hv_bps_mod_vol_22,
+            self.HV_BPS_MOD_VOL_23: self._handle_hv_bps_mod_vol_23,
+            self.HV_BPS_MOD_VOL_24: self._handle_hv_bps_mod_vol_24,
         }
 
     def run(self) -> None:
@@ -344,225 +471,602 @@ class TelemetryApp:
 
     def _handle_temperature(self, msg: DecodedMessage) -> None:
         temperature_c = PacketDecoder.decode_temperature(msg)
+
+        point = (
+            Point("temperature")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", temperature_c)
+        )
+
         print(f"[Telemetry] Temperature: {temperature_c:.2f} C")
-        self._influx_writer.write_temperature(msg, temperature_c)
-        
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_dr_ctrl_main_hv_sw(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for driver control main HV switch
-    
+
     def _handle_dr_ctrl_motor_hv_sw(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for driver control motor HV switch
-    
+
     def _handle_dr_ctrl_mppt_hv_sw(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for driver control MPPT HV switch
-    
+
     def _handle_dr_ctrl_motor_fr_sw(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for driver control motor forward/reverse switch    
-    
+        pass  # TODO: implement handling for driver control motor forward/reverse switch
+
     def _handle_dr_ctrl_motor_pe_sw(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for driver control motor power/enable switch
-    
+
     def _handle_dr_ctrl_service_br_sw(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for driver control service brake switch
-    
+
     def _handle_dr_ctrl_parking_br_sw(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for driver control parking brake switch
-    
+
     def _handle_dr_ctrl_right_turn_sw(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for driver control right turn switch
-    
+
     def _handle_dr_ctrl_left_turn_sw(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for driver control left turn switch
-    
+
     def _handle_rear_ctrl_motor_rpm(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control motor RPM
-    
+
     def _handle_rear_ctrl_vehicle_speed(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control vehicle speed
-    
+
     def _handle_rear_ctrl_arr_vol_1(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control array voltage 1
-    
+
     def _handle_rear_ctrl_arr_cur_1(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control array current 1
-    
+
     def _handle_rear_ctrl_bat_meas_1(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control battery measurement 1
-    
+
     def _handle_rear_ctrl_mppt_temp_1(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control MPPT temperature 1
-    
+
     def _handle_rear_ctrl_arr_vol_2(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control array voltage 2
-    
+
     def _handle_rear_ctrl_arr_cur_2(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control array current 2
-    
+
     def _handle_rear_ctrl_bat_meas_2(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control battery measurement 2
-    
+
     def _handle_rear_ctrl_mppt_temp_2(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control MPPT temperature 2
-    
+
     def _handle_rear_ctrl_arr_vol_3(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control array voltage 3
-    
+
     def _handle_rear_ctrl_arr_cur_3(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control array current 3
-    
+
     def _handle_rear_ctrl_bat_meas_3(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control battery measurement 3
-    
+
     def _handle_rear_ctrl_mppt_temp_3(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control MPPT temperature 3
-    
+
     def _handle_rear_ctrl_arr_vol_4(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control array voltage 4
-    
+
     def _handle_rear_ctrl_arr_cur_4(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control array current 4
-    
+
     def _handle_rear_ctrl_bat_meas_4(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control battery measurement 4
-    
+
     def _handle_rear_ctrl_mppt_temp_4(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for rear control MPPT temperature 4
-    
+
     def _handle_lv_bps_bat_vol(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for LV BPS battery voltage
-    
+
     def _handle_lv_bps_bat_cur(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for LV BPS battery current
-    
+
     def _handle_lv_bps_sys_cur(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for LV BPS system current
-    
+
     def _handle_lv_bps_bat_temp(self, msg: DecodedMessage) -> None:
         pass  # TODO: implement handling for LV BPS battery temperature
-    
+
     def _handle_hv_bps_fault_flags(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS fault flags
-    
+        hv_fault = struct.unpack('<I', msg.payload[:4])[0]
+
+        # Only 0 or 1
+        print(f"[Telemetry] HV BPS Fault Flags: {hv_fault}")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_hv_fault")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", hv_fault)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_main_contactor_status(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS main contactor status
-    
+        hv_main_contractor = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Main Contactor Status: {hv_main_contractor}")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_hv_main_contractor")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", hv_main_contractor)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_motor_contactor_status(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS motor contactor status
-    
+        hv_motor_contractor = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Motor Contactor Status: {hv_motor_contractor}")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_hv_motor_contractor")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", hv_motor_contractor)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mppt_contactor_status(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS MPPT contactor status
-    
+        hv_mppt_contractor = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS MPPT Contactor Status: {hv_mppt_contractor}")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_hv_mppt_contractor")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", hv_mppt_contractor)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_bat_vol(self, msg: DecodedMessage) -> None:
         bat_pack_voltage = struct.unpack('<I', msg.payload[:4])[0]
-        
+
         # Multiple by 0.1 mV to convert to volts
         bat_pack_voltage_volts = bat_pack_voltage * 0.0001
-        
+
         print(f"[Telemetry] HV BPS Battery Pack Voltage: {bat_pack_voltage_volts:.2f} V")
-        
-        self._influx_writer.write_bat_pack_voltage(msg, bat_pack_voltage_volts)
-    
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_pack_voltage")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", bat_pack_voltage_volts)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_bat_cur(self, msg: DecodedMessage) -> None:
         bat_current = struct.unpack('<i', msg.payload[:4])[0]
-        
+
         print(f"[Telemetry] HV BPS Battery Current: {bat_current:.2f} A")
-        
-        self._influx_writer.write_bat_pack_current(msg, bat_current)
-    
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_pack_current")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", bat_current)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_bat_avg_temp(self, msg: DecodedMessage) -> None:
         bat_avg_temp = struct.unpack('<I', msg.payload[:4])[0]
-        
+
         print(f"[Telemetry] HV BPS Battery Average Temperature: {bat_avg_temp} C")
-        
-        self._influx_writer.write_bat_avg_temp(msg, bat_avg_temp)
-        
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_avg_temp")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", bat_avg_temp)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_bat_max_temp(self, msg: DecodedMessage) -> None:
         bat_max_temp = struct.unpack('<I', msg.payload[:4])[0]
-        
+
         print(f"[Telemetry] HV BPS Battery Max Temperature: {bat_max_temp} C")
-        
-        self._influx_writer.write_bat_max_temp(msg, bat_max_temp)
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_max_temp")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", bat_max_temp)
+        )
+
+        self._influx_writer.write_datapoint(point)
 
     def _handle_hv_bps_bat_soc(self, msg: DecodedMessage) -> None:
         # Assemble the first 4-bytes of the payload into a uint32
         bat_soc = struct.unpack('<I', msg.payload[:4])[0]
-        
+
         # bat_soc is percentage in range of 0 to 100
         print(f"[Telemetry] HV BPS Battery State of Charge: {bat_soc} %")
-        
-        self._influx_writer.write_soc(msg, bat_soc)
-    
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_soc")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", bat_soc)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_1(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 1
+        bms_vol_1 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 1 Voltage: {bms_vol_1} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 1)
+            .field("value", bms_vol_1)
+        )
+
+        self._influx_writer.write_datapoint(point)
 
     def _handle_hv_bps_mod_vol_2(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 2
-    
+        bms_vol_2 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 2 Voltage: {bms_vol_2} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 2)
+            .field("value", bms_vol_2)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_3(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 3
-    
+        bms_vol_3 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 3 Voltage: {bms_vol_3} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 3)
+            .field("value", bms_vol_3)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_4(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 4
-    
+        bms_vol_4 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 4 Voltage: {bms_vol_4} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 4)
+            .field("value", bms_vol_4)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_5(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 5
-    
+        bms_vol_5 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 5 Voltage: {bms_vol_5} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 5)
+            .field("value", bms_vol_5)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_6(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 6
-    
+        bms_vol_6 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 6 Voltage: {bms_vol_6} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 6)
+            .field("value", bms_vol_6)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_7(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 7
-    
+        bms_vol_7 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 7 Voltage: {bms_vol_7} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 7)
+            .field("value", bms_vol_7)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_8(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 8
-    
+        bms_vol_8 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 8 Voltage: {bms_vol_8} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 8)
+            .field("value", bms_vol_8)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_9(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 9
-    
+        bms_vol_9 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 9 Voltage: {bms_vol_9} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 9)
+            .field("value", bms_vol_9)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_10(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 10
-    
+        bms_vol_10 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 10 Voltage: {bms_vol_10} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 10)
+            .field("value", bms_vol_10)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_11(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 11
-    
+        bms_vol_11 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 11 Voltage: {bms_vol_11} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 11)
+            .field("value", bms_vol_11)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_12(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 12
-    
+        bms_vol_12 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 12 Voltage: {bms_vol_12} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 12)
+            .field("value", bms_vol_12)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_13(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 13
-    
+        bms_vol_13 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 13 Voltage: {bms_vol_13} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 13)
+            .field("value", bms_vol_13)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_14(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 14
-    
+        bms_vol_14 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 14 Voltage: {bms_vol_14} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 14)
+            .field("value", bms_vol_14)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_15(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 15
-    
+        bms_vol_15 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 15 Voltage: {bms_vol_15} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 15)
+            .field("value", bms_vol_15)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_16(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 16
-    
+        bms_vol_16 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 16 Voltage: {bms_vol_16} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 16)
+            .field("value", bms_vol_16)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_17(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 17
-    
+        bms_vol_17 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 17 Voltage: {bms_vol_17} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 17)
+            .field("value", bms_vol_17)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_18(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 18
-    
+        bms_vol_18 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 18 Voltage: {bms_vol_18} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 18)
+            .field("value", bms_vol_18)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_19(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 19
-    
+        bms_vol_19 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 19 Voltage: {bms_vol_19} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 19)
+            .field("value", bms_vol_19)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_20(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 20
-    
+        bms_vol_20 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 20 Voltage: {bms_vol_20} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 20)
+            .field("value", bms_vol_20)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_21(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 21
-    
+        bms_vol_21 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 21 Voltage: {bms_vol_21} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 21)
+            .field("value", bms_vol_21)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_22(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 22
-    
+        bms_vol_22 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 22 Voltage: {bms_vol_22} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 22)
+            .field("value", bms_vol_22)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_23(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 23
-    
+        bms_vol_23 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 23 Voltage: {bms_vol_23} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 23)
+            .field("value", bms_vol_23)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
     def _handle_hv_bps_mod_vol_24(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for HV BPS module voltage 24
+        bms_vol_24 = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV BPS Module 24 Voltage: {bms_vol_24} mV")
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+        point = (
+            Point("battery_vol_module")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("module", 24)
+            .field("value", bms_vol_24)
+        )
+
+        self._influx_writer.write_datapoint(point)
 
 # =========================
 # Entry Point
