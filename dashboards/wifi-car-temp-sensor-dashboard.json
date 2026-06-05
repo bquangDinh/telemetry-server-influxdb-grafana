@@ -327,6 +327,6 @@
     "timezone": "browser",
     "to": "now"
   },
-  "title": "Wifi - Temperature",
+  "title": "Wifi - Car Temperature",
   "variables": []
 }

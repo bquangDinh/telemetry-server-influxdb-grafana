@@ -565,16 +565,77 @@ class TelemetryApp:
         pass  # TODO: implement handling for rear control MPPT temperature 4
 
     def _handle_lv_bps_bat_vol(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for LV BPS battery voltage
+        lv_bat_vol = struct.unpack('<I', msg.payload[:4])[0]
+
+        # Multiple by 0.1 mV to convert to volts
+        lv_bat_volts = lv_bat_vol * 0.0001
+
+        print(f"[Telemetry] LV BPS Battery Voltage: {lv_bat_volts:.2f} V")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("battery_lv_volt")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", lv_bat_volts)
+        )
+
+        self._influx_writer.write_datapoint(point)
 
     def _handle_lv_bps_bat_cur(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for LV BPS battery current
+        lv_bat_cur = struct.unpack('<I', msg.payload[:4])[0]
+
+        # Multiple by 0.1 mA to convert to amps
+        lv_bat_amps = lv_bat_cur * 0.0001
+
+        print(f"[Telemetry] LV BPS Battery Current: {lv_bat_amps:.2f} A")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("battery_lv_current")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", lv_bat_amps)
+        )
+
+        self._influx_writer.write_datapoint(point)
 
     def _handle_lv_bps_sys_cur(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for LV BPS system current
+        lv_sys_cur = struct.unpack('<I', msg.payload[:4])[0]
+
+        # Multiple by 0.1 mA to convert to amps
+        lv_sys_amps = lv_sys_cur * 0.0001
+
+        print(f"[Telemetry] LV BPS System Current: {lv_sys_amps:.2f} A")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("battery_lv_system_current")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", lv_sys_amps)
+        )
+
+        self._influx_writer.write_datapoint(point)
 
     def _handle_lv_bps_bat_temp(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for LV BPS battery temperature
+        lv_bat_temp = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] LV BPS Battery Temperature: {lv_bat_temp} C")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("battery_lv_temp")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", lv_bat_temp)
+        )
+
+        self._influx_writer.write_datapoint(point)
 
     def _handle_hv_bps_fault_flags(self, msg: DecodedMessage) -> None:
         hv_fault = struct.unpack('<I', msg.payload[:4])[0]
