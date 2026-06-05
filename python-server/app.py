@@ -118,7 +118,7 @@ class InfluxWriter:
             Point("temperature")
             .tag("message_id", f"0x{msg.message_id:08X}")
             .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
-            .field("value_c", temperature_c)
+            .field("value", temperature_c)
         )
 
         self._client.write(point)
@@ -133,7 +133,7 @@ class InfluxWriter:
             Point("battery_soc")
             .tag("message_id", f"0x{msg.message_id:08X}")
             .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
-            .field("value_percent", soc_percent)
+            .field("value", soc_percent)
         )
 
         self._client.write(point)
@@ -148,7 +148,7 @@ class InfluxWriter:
             Point("battery_avg_temp")
             .tag("message_id", f"0x{msg.message_id:08X}")
             .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
-            .field("value_c", avg_temp_c)
+            .field("value", avg_temp_c)
         )
 
         self._client.write(point)
@@ -163,7 +163,7 @@ class InfluxWriter:
             Point("battery_max_temp")
             .tag("message_id", f"0x{msg.message_id:08X}")
             .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
-            .field("value_c", max_temp_c)
+            .field("value", max_temp_c)
         )
 
         self._client.write(point)
@@ -178,7 +178,7 @@ class InfluxWriter:
             Point("battery_pack_voltage")
             .tag("message_id", f"0x{msg.message_id:08X}")
             .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
-            .field("value_v", voltage_v)
+            .field("value", voltage_v)
         )
 
         self._client.write(point)
@@ -193,7 +193,7 @@ class InfluxWriter:
             Point("battery_pack_current")
             .tag("message_id", f"0x{msg.message_id:08X}")
             .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
-            .field("value_a", current_a)
+            .field("value", current_a)
         )
 
         self._client.write(point)
@@ -209,7 +209,7 @@ class InfluxWriter:
             .tag("message_id", f"0x{msg.message_id:08X}")
             .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
             .field("module", module_num)
-            .field("value_v", voltage_v)
+            .field("value", voltage_v)
         )
 
         self._client.write(point)
@@ -484,85 +484,382 @@ class TelemetryApp:
         self._influx_writer.write_datapoint(point)
 
     def _handle_dr_ctrl_main_hv_sw(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for driver control main HV switch
+        switch_status = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("dr_ctrl_main_hv_sw")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", switch_status)
+        )
+        
+        print(f"[Telemetry] Driver Control Main HV Switch: {switch_status}")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_dr_ctrl_motor_hv_sw(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for driver control motor HV switch
+        switch_status = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("dr_ctrl_motor_hv_sw")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", switch_status)
+        )
+        
+        print(f"[Telemetry] Driver Control Motor HV Switch: {switch_status}")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_dr_ctrl_mppt_hv_sw(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for driver control MPPT HV switch
+        switch_status = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("dr_ctrl_mppt_hv_sw")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", switch_status)
+        )
+        
+        print(f"[Telemetry] Driver Control MPPT HV Switch: {switch_status}")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_dr_ctrl_motor_fr_sw(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for driver control motor forward/reverse switch
+        switch_status = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("dr_ctrl_motor_fr_sw")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", switch_status)
+        )
+        
+        print(f"[Telemetry] Driver Control Motor Forward/Reverse Switch: {switch_status}")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_dr_ctrl_motor_pe_sw(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for driver control motor power/enable switch
+        switch_status = struct.unpack('<I', msg.payload[:4])[0]
+
+        point = (
+            Point("dr_ctrl_motor_pe_sw")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", switch_status)
+        )
+
+        print(f"[Telemetry] Driver Control Motor Power/Enable Switch: {switch_status}")
+
+        self._influx_writer.write_datapoint(point)
 
     def _handle_dr_ctrl_service_br_sw(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for driver control service brake switch
+        switch_status = struct.unpack('<I', msg.payload[:4])[0]
+
+        point = (
+            Point("dr_ctrl_service_br_sw")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", switch_status)
+        )
+
+        print(f"[Telemetry] Driver Control Service Brake Switch: {switch_status}")
+
+        self._influx_writer.write_datapoint(point)
 
     def _handle_dr_ctrl_parking_br_sw(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for driver control parking brake switch
+        switch_status = struct.unpack('<I', msg.payload[:4])[0]
+
+        point = (
+            Point("dr_ctrl_parking_br_sw")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", switch_status)
+        )
+
+        print(f"[Telemetry] Driver Control Parking Brake Switch: {switch_status}")
+
+        self._influx_writer.write_datapoint(point)
 
     def _handle_dr_ctrl_right_turn_sw(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for driver control right turn switch
+        switch_status = struct.unpack('<I', msg.payload[:4])[0]
+
+        point = (
+            Point("dr_ctrl_right_turn_sw")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", switch_status)
+        )
+
+        print(f"[Telemetry] Driver Control Right Turn Switch: {switch_status}")
+
+        self._influx_writer.write_datapoint(point)
 
     def _handle_dr_ctrl_left_turn_sw(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for driver control left turn switch
+        switch_status = struct.unpack('<I', msg.payload[:4])[0]
+
+        point = (
+            Point("dr_ctrl_left_turn_sw")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", switch_status)
+        )
+
+        print(f"[Telemetry] Driver Control Left Turn Switch: {switch_status}")
+
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_motor_rpm(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control motor RPM
+        motor_rpm = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_motor_rpm")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", motor_rpm)
+        )
+        
+        print(f"[Telemetry] Rear Control Motor RPM: {motor_rpm} rpm")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_vehicle_speed(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control vehicle speed
+        vehicle_speed = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_vehicle_speed")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", vehicle_speed)
+        )
+        
+        print(f"[Telemetry] Rear Control Vehicle Speed: {vehicle_speed:.2f} km/h")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_arr_vol_1(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control array voltage 1
+        value = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_arr_vol_1")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", value)
+        )
+        
+        print(f"[Telemetry] Rear Control Array Voltage 1: {value} V")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_arr_cur_1(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control array current 1
+        value = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_arr_cur_1")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", value)
+        )
+        
+        print(f"[Telemetry] Rear Control Array Current 1: {value} A")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_bat_meas_1(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control battery measurement 1
+        value = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_bat_meas_1")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", value)
+        )
+        
+        print(f"[Telemetry] Rear Control Battery Measurement 1: {value}")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_mppt_temp_1(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control MPPT temperature 1
+        value = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_mppt_temp_1")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", value)
+        )
+        
+        print(f"[Telemetry] Rear Control MPPT Temperature 1: {value} C")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_arr_vol_2(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control array voltage 2
+        value = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_arr_vol_2")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", value)
+        )
+        
+        print(f"[Telemetry] Rear Control Array Voltage 2: {value} V")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_arr_cur_2(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control array current 2
+        value = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_arr_cur_2")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", value)
+        )
+        
+        print(f"[Telemetry] Rear Control Array Current 2: {value} A")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_bat_meas_2(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control battery measurement 2
+        value = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_bat_meas_2")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", value)
+        )
+        
+        print(f"[Telemetry] Rear Control Battery Measurement 2: {value}")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_mppt_temp_2(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control MPPT temperature 2
+        value = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_mppt_temp_2")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", value)
+        )
+        
+        print(f"[Telemetry] Rear Control MPPT Temperature 2: {value} C")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_arr_vol_3(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control array voltage 3
+        value = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_arr_vol_3")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", value)
+        )
+        
+        print(f"[Telemetry] Rear Control Array Voltage 3: {value} V")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_arr_cur_3(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control array current 3
+        value = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_arr_cur_3")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", value)
+        )
+        
+        print(f"[Telemetry] Rear Control Array Current 3: {value} A")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_bat_meas_3(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control battery measurement 3
+        value = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_bat_meas_3")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", value)
+        )
+        
+        print(f"[Telemetry] Rear Control Battery Measurement 3: {value}")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_mppt_temp_3(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control MPPT temperature 3
+        value = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_mppt_temp_3")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", value)
+        )
+        
+        print(f"[Telemetry] Rear Control MPPT Temperature 3: {value} C")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_arr_vol_4(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control array voltage 4
+        value = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_arr_vol_4")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", value)
+        )
+        
+        print(f"[Telemetry] Rear Control Array Voltage 4: {value} V")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_arr_cur_4(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control array current 4
+        value = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_arr_cur_4")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", value)
+        )
+        
+        print(f"[Telemetry] Rear Control Array Current 4: {value} A")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_bat_meas_4(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control battery measurement 4
+        value = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_bat_meas_4")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", value)
+        )
+        
+        print(f"[Telemetry] Rear Control Battery Measurement 4: {value}")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_rear_ctrl_mppt_temp_4(self, msg: DecodedMessage) -> None:
-        pass  # TODO: implement handling for rear control MPPT temperature 4
+        value = struct.unpack('<I', msg.payload[:4])[0]
+        
+        point = (
+            Point("rear_ctrl_mppt_temp_4")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", "wifi" if msg.message_type == 0 else "cellular")
+            .field("value", value)
+        )
+        
+        print(f"[Telemetry] Rear Control MPPT Temperature 4: {value} C")
+        
+        self._influx_writer.write_datapoint(point)
 
     def _handle_lv_bps_bat_vol(self, msg: DecodedMessage) -> None:
         lv_bat_vol = struct.unpack('<I', msg.payload[:4])[0]
