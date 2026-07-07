@@ -15,7 +15,7 @@ UDP_IP = os.getenv("UDP_IP")
 UDP_PORT = int(os.getenv("UDP_PORT"))
 
 HTTP_HOST = "0.0.0.0"
-HTTP_PORT = 5000
+HTTP_PORT = int(os.getenv("TCP_PROXY_PORT", 8082))
 
 # =========================
 # Data Models
@@ -78,6 +78,10 @@ def notecard():
     except Exception as e:
         print("ERROR:", e)
         return "Internal Server Error", 500
+
+@app.route("/health", methods=["GET"])
+def health():
+    return "OK", 200
 
 # =========================
 # MAIN

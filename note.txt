@@ -1,0 +1,7 @@
+Fix grafana data folder permission error:
+sudo chown -R 472:472 ./grafana
+sudo chmod -R 755 ./grafana
+
+Fix influxdb3 data folder permission error:
+sudo chown -R 1500:1500 ./influxdb3
+sudo chmod -R 755 ./influxdb3
