@@ -44,12 +44,21 @@ def notecard():
     try:
         # Parse JSON from Notehub
         data = request.get_json()
+        
+        print("Received HTTP POST:")
+        
+        print(json.dumps(data, indent=2))
 
         if data is None:
             return "Invalid JSON", 400
 
         # Convert json to data model before converting to bytes
+        # Check if payload is present and encode it to bytes
+        if "payload" not in data:
+            return "Missing 'payload' in request", 400
+        
         payload = data.get("payload", "").encode("utf-8")
+        
         len = len(payload)
         
         decoded_message = DecodedMessage(
