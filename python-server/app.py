@@ -55,7 +55,8 @@ class DecodedMessage:
     message_id: int
     length: int
     payload: bytes
-
+    longtitude: float = 0.0
+    latitude: float = 0.0
 
 # =========================
 # Decoder
@@ -79,12 +80,21 @@ class PacketDecoder:
             )
 
         payload = data[9:9 + length]
+        
+        # Check if longtitude and latitude are present in the payload
+        longtitude = 0.0
+        latitude = 0.0
+        
+        if len(data) >= 9 + length + 8:  # 4 bytes for longtitude and 4 bytes for latitude
+            longtitude, latitude = struct.unpack("<ff", data[9 + length:9 + length + 8])
 
         return DecodedMessage(
             message_type=message_type,
             message_id=message_id,
             length=length,
             payload=payload,
+            longtitude=longtitude,
+            latitude=latitude
         )
 
     @staticmethod
@@ -450,6 +460,8 @@ class TelemetryApp:
                     f"id=0x{msg.message_id:08X} "
                     f"len={msg.length} "
                     f"payload={msg.payload.hex(' ')}"
+                    f" longtitude={msg.longtitude:.6f} "
+                    f"latitude={msg.latitude:.6f} "
                 )
 
                 handler = self._handlers.get(msg.message_id)

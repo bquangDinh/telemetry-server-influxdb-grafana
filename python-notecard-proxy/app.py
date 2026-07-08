@@ -27,6 +27,8 @@ class DecodedMessage:
     message_id: int
     length: int
     payload: bytes
+    longtitude: float = 0.0
+    latitude: float = 0.0
 
 # =========================
 # INIT
@@ -53,11 +55,22 @@ def notecard():
             return "Invalid JSON", 400
 
         # Convert json to data model before converting to bytes
-        # Check if payload is present and encode it to bytes
-        if "payload" not in data:
-            return "Missing 'payload' in request", 400
+
+        if "file" not in data:
+            return "Missing 'file' field", 400
+    
+        if "body" not in data:
+            return "Missing 'body' field", 400
+    
+        # Transform data
+        if data["file"] != "data.qo":
+            return "Invalid 'file' field", 400
         
-        payload = data.get("payload", "").encode("utf-8")
+        # Transform data
+        payload = data.get("body", "").encode("utf-8")
+        
+        longtitude = data.get("best_lon") if "best_lon" in data else 0.0
+        latitude = data.get("best_lat") if "best_lat" in data else 0
         
         len = len(payload)
         
@@ -65,7 +78,9 @@ def notecard():
             message_type=1,
             message_id=data.get("id", 0),
             length=len,
-            payload=payload
+            payload=payload,
+            longtitude=longtitude,
+            latitude=latitude
         )
         
         # Convert decoded message to bytes
@@ -75,6 +90,7 @@ def notecard():
         message_bytes.extend(struct.pack("<I", decoded_message.message_id))
         message_bytes.append(decoded_message.length)
         message_bytes.extend(decoded_message.payload)
+        message_bytes.extend(struct.pack("<ff", decoded_message.longtitude, decoded_message.latitude))
 
         # Forward over UDP
         udp_socket.sendto(message_bytes, (UDP_IP, UDP_PORT))
