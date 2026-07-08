@@ -67,7 +67,12 @@ def notecard():
             return "Invalid 'file' field", 400
         
         # Transform data
-        payload = data.get("body", "").encode("utf-8")
+        body = data.get("body", {})
+        
+        payload = body.get("payload", "").encode("utf-8")
+        
+        # Trim ending spaces and null bytes from payload
+        payload = payload.rstrip(b" \x00")
         
         longtitude = data.get("best_lon") if "best_lon" in data else 0.0
         latitude = data.get("best_lat") if "best_lat" in data else 0
@@ -76,7 +81,7 @@ def notecard():
         
         decoded_message = DecodedMessage(
             message_type=1,
-            message_id=data.get("id", 0),
+            message_id=body.get("id", 0),
             length=len,
             payload=payload,
             longtitude=longtitude,
