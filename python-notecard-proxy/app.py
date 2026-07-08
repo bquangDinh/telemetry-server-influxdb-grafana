@@ -77,12 +77,12 @@ def notecard():
         longtitude = data.get("best_lon") if "best_lon" in data else 0.0
         latitude = data.get("best_lat") if "best_lat" in data else 0
         
-        len = len(payload)
+        payload_length = len(payload)
         
         decoded_message = DecodedMessage(
             message_type=1,
             message_id=body.get("id", 0),
-            length=len,
+            length=payload_length,
             payload=payload,
             longtitude=longtitude,
             latitude=latitude
