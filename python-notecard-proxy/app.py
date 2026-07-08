@@ -63,41 +63,36 @@ def notecard():
             return "Missing 'body' field", 400
     
         # Transform data
-        if data["file"] != "data.qo":
-            return "Invalid 'file' field", 400
-        
-        # Transform data
         body = data.get("body", {})
-        
-        payload = body.get("payload", "").encode("utf-8")
-        
-        # Trim ending spaces and null bytes from payload
-        payload = payload.rstrip(b" \x00")
-        
-        longtitude = data.get("best_lon") if "best_lon" in data else 0.0
-        latitude = data.get("best_lat") if "best_lat" in data else 0
-        
-        payload_length = len(payload)
-        
+
+        payload_hex = body.get("payload", "")
+        payload = bytes.fromhex(payload_hex)
+
+        payload_length = body.get("len", len(payload))
+
+        if payload_length != len(payload):
+            return f"Payload length mismatch: len={payload_length}, actual={len(payload)}", 400
+
+        longitude = float(data.get("best_lon", 0.0))
+        latitude = float(data.get("best_lat", 0.0))
+
         decoded_message = DecodedMessage(
             message_type=1,
-            message_id=body.get("id", 0),
+            message_id=int(body.get("id", 0)),
             length=payload_length,
             payload=payload,
-            longtitude=longtitude,
+            longtitude=longitude,
             latitude=latitude
         )
-        
-        # Convert decoded message to bytes
+
         message_bytes = bytearray()
-        
-        message_bytes.append(decoded_message.message_type)        
+
+        message_bytes.append(decoded_message.message_type)
         message_bytes.extend(struct.pack("<I", decoded_message.message_id))
         message_bytes.append(decoded_message.length)
         message_bytes.extend(decoded_message.payload)
         message_bytes.extend(struct.pack("<ff", decoded_message.longtitude, decoded_message.latitude))
 
-        # Forward over UDP
         udp_socket.sendto(message_bytes, (UDP_IP, UDP_PORT))
 
         print("Forwarded UDP packet:")

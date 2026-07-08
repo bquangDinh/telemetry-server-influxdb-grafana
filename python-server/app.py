@@ -63,37 +63,61 @@ class DecodedMessage:
 # =========================
 
 class PacketDecoder:
-    MIN_PACKET_SIZE = 9
+    MIN_PACKET_SIZE = 6
+    TYPE_NOTECARD_CAN = 1
+    TYPE_WIFI_TEXT = 0
+    
     @staticmethod
     def decode(data: bytes) -> DecodedMessage:
-        if len(data) < PacketDecoder.MIN_PACKET_SIZE:
+        if len(data) < PacketDecoder.HEADER_SIZE:
             raise ValueError(f"Packet too short: got {len(data)} bytes")
 
         message_type = data[0]
-        message_id = struct.unpack("<I", data[4:8])[0]
-        length = data[8]
+        message_id = struct.unpack("<I", data[1:5])[0]
+        length = data[5]
 
-        if len(data) < 9 + length:
-            raise ValueError(
-                f"Packet payload incomplete: expected {length} payload bytes, "
-                f"but packet length is only {len(data)}"
-            )
+        payload_start = PacketDecoder.HEADER_SIZE
 
-        payload = data[9:9 + length]
-        
-        # Check if longtitude and latitude are present in the payload
-        longtitude = 0.0
+        longitude = 0.0
         latitude = 0.0
-        
-        if len(data) >= 9 + length + 8:  # 4 bytes for longtitude and 4 bytes for latitude
-            longtitude, latitude = struct.unpack("<ff", data[9 + length:9 + length + 8])
+
+        if message_type == PacketDecoder.TYPE_NOTECARD_CAN:
+            payload_end = payload_start + length
+
+            if len(data) < payload_end:
+                raise ValueError(
+                    f"Packet payload incomplete: expected {length} payload bytes, "
+                    f"but packet length is only {len(data)}"
+                )
+
+            payload = data[payload_start:payload_end]
+
+            if len(data) >= payload_end + 8:
+                longitude, latitude = struct.unpack(
+                    "<ff",
+                    data[payload_end:payload_end + 8]
+                )
+
+        elif message_type == PacketDecoder.TYPE_WIFI_TEXT:
+            raw_payload = data[payload_start:]
+
+            if length <= len(raw_payload):
+                payload = raw_payload[:length]
+            else:
+                payload = raw_payload
+
+            payload = payload.rstrip(b" \x00\r\n")
+            length = len(payload)
+
+        else:
+            raise ValueError(f"Unknown message_type: {message_type}")
 
         return DecodedMessage(
             message_type=message_type,
             message_id=message_id,
-            length=length,
+            length=len(payload),
             payload=payload,
-            longtitude=longtitude,
+            longtitude=longitude,
             latitude=latitude
         )
 
