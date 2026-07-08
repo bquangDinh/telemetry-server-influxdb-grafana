@@ -63,7 +63,7 @@ class DecodedMessage:
 # =========================
 
 class PacketDecoder:
-    MIN_PACKET_SIZE = 6
+    HEADER_SIZE = 6
     TYPE_NOTECARD_CAN = 1
     TYPE_WIFI_TEXT = 0
     
