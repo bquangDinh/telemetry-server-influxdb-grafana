@@ -478,7 +478,7 @@ class TelemetryApp:
             .field("payload", msg.payload.hex(' '))
             .field("length", msg.length)
             .field("message_type", msg.message_type)
-            .field("message_id", msg.message_id)
+            .field("message_id", f"0x{msg.message_id:08X}")
             .field("longitude", msg.longtitude)
             .field("latitude", msg.latitude)
         )
