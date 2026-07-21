@@ -2,11 +2,15 @@ print('Python Notecard Proxy starting...', flush=True)
 
 from dataclasses import dataclass
 import struct
+import requests
 
 from flask import Flask, request
 import socket
 import json
 import os
+
+ADDON_TELEMETRY_URL = os.getenv("ADDON_TELEMETRY_URL") or "https://purveyor-tattered-abroad.ngrok-free.dev/telemetry"
+ADDON_TELEMETRY_BEARER_TOKEN = os.getenv("ADDON_TELEMETRY_BEARER_TOKEN")
 
 # =========================
 # CONFIG
@@ -46,9 +50,9 @@ def notecard():
     try:
         # Parse JSON from Notehub
         data = request.get_json()
-        
+
         print("Received HTTP POST:")
-        
+
         print(json.dumps(data, indent=2))
 
         if data is None:
@@ -58,10 +62,10 @@ def notecard():
 
         if "file" not in data:
             return "Missing 'file' field", 400
-    
+
         if "body" not in data:
             return "Missing 'body' field", 400
-    
+
         # Transform data
         body = data.get("body", {})
 
@@ -98,6 +102,19 @@ def notecard():
         print("Forwarded UDP packet:")
         print(json.dumps(data, indent=2))
 
+        formatted_data = {
+            "id": decoded_message.message_id,
+            "len": decoded_message.length,
+            "payload": decoded_message.payload.hex(),
+            "longitude": decoded_message.longtitude,
+            "latitude": decoded_message.latitude
+        }
+
+        try:
+            route_to_addon_telemetry(formatted_data)
+        except Exception as e:
+            print(f"Error routing telemetry to addon: {e}")
+
         return "", 204
 
     except Exception as e:
@@ -107,6 +124,21 @@ def notecard():
 @app.route("/health", methods=["GET"])
 def health():
     return "OK", 200
+
+def route_to_addon_telemetry(data):
+	try:
+		headers = {
+      		"Authorization": ADDON_TELEMETRY_BEARER_TOKEN,
+			"Content-Type": "application/json"
+      	}
+
+		response = requests.post(ADDON_TELEMETRY_URL, json=data, headers=headers)
+
+		if response.status_code != 200:
+			print(f"Failed to forward telemetry to addon: {response.status_code} - {response.text}")
+	except Exception as e:
+		print(f"Error forwarding telemetry to addon: {e}")
+		print(f"Error forwarding telemetry to addon: {e}")
 
 # =========================
 # MAIN

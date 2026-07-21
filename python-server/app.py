@@ -69,6 +69,9 @@ class PacketDecoder:
 
     @staticmethod
     def decode(data: bytes) -> DecodedMessage:
+        # Show raw
+        print(f"[Raw] {data.hex(' ')}")
+
         if len(data) < PacketDecoder.HEADER_SIZE:
             raise ValueError(f"Packet too short: got {len(data)} bytes")
 
@@ -99,15 +102,9 @@ class PacketDecoder:
                 )
 
         elif message_type == PacketDecoder.TYPE_WIFI_TEXT:
-            raw_payload = data[payload_start:]
+            raw_payload = data[payload_start:payload_start + length]
 
-            if length <= len(raw_payload):
-                payload = raw_payload[:length]
-            else:
-                payload = raw_payload
-
-            payload = payload.rstrip(b" \x00\r\n")
-            length = len(payload)
+            payload = raw_payload
 
         else:
             raise ValueError(f"Unknown message_type: {message_type}")
@@ -115,7 +112,7 @@ class PacketDecoder:
         return DecodedMessage(
             message_type=message_type,
             message_id=message_id,
-            length=len(payload),
+            length=length,
             payload=payload,
             longtitude=longitude,
             latitude=latitude

@@ -4,19 +4,21 @@
   "metadata": {
     "name": "advcbh7",
     "namespace": "default",
-    "uid": "00867d5b-0dc9-42ed-b217-cfeab4da8b0f",
-    "resourceVersion": "1780245757349985",
-    "generation": 17,
-    "creationTimestamp": "2026-05-31T15:11:15Z",
+    "uid": "1a828fa8-261b-4ccb-b5c6-c9c91adb53fe",
+    "resourceVersion": "1783396945085017",
+    "generation": 1,
+    "creationTimestamp": "2026-07-07T04:02:25Z",
     "labels": {
-      "grafana.app/deprecatedInternalID": "2958190357041152"
+      "grafana.app/deprecatedInternalID": "2687422214385664"
     },
     "annotations": {
-      "grafana.app/createdBy": "user:afmv47jwou5mof",
-      "grafana.app/folder": "",
-      "grafana.app/saved-from-ui": "Grafana v13.0.1+security-01 (9bbe672d)",
-      "grafana.app/updatedBy": "user:afmv47jwou5mof",
-      "grafana.app/updatedTimestamp": "2026-05-31T16:42:37Z"
+      "grafana.app/createdBy": "access-policy:service",
+      "grafana.app/managedBy": "classic-file-provisioning",
+      "grafana.app/managerId": "default",
+      "grafana.app/sourceChecksum": "61e9f21ea6e61e895eb0afc4d45e0d02",
+      "grafana.app/sourcePath": "/var/lib/grafana/dashboards/wifi-car-hv-bms.json",
+      "grafana.app/sourceTimestamp": "1783391349000",
+      "grafana.app/folder": ""
     }
   },
   "spec": {
@@ -24,20 +26,20 @@
       {
         "kind": "AnnotationQuery",
         "spec": {
-          "query": {
-            "kind": "DataQuery",
-            "group": "grafana",
-            "version": "v0",
-            "datasource": {
-              "name": "-- Grafana --"
-            },
-            "spec": {}
-          },
+          "builtIn": true,
           "enable": true,
           "hide": true,
           "iconColor": "rgba(0, 211, 255, 1)",
           "name": "Annotations & Alerts",
-          "builtIn": true
+          "query": {
+            "datasource": {
+              "name": "-- Grafana --"
+            },
+            "group": "grafana",
+            "kind": "DataQuery",
+            "spec": {},
+            "version": "v0"
+          }
         }
       }
     ],
@@ -47,10 +49,6 @@
       "panel-1": {
         "kind": "Panel",
         "spec": {
-          "id": 1,
-          "title": "HV Fault Flag Timeline",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -58,13 +56,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "influxdb",
-                      "version": "v0",
                       "datasource": {
                         "name": "P2A13252C41BAC6F2"
                       },
+                      "group": "influxdb",
+                      "kind": "DataQuery",
                       "spec": {
                         "groupBy": [],
                         "measurement": "battery_hv_fault",
@@ -85,66 +83,36 @@
                           {
                             "key": "message_id",
                             "operator": "=",
-                            "value": "0x400010C"
+                            "value": "0x0400010C"
                           },
                           {
                             "condition": "AND",
                             "key": "message_type",
-                            "operator": "=",
-                            "value": "wifi"
+                            "operator": "=~",
+                            "value": "/^$type$/"
                           }
                         ]
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 1,
+          "links": [],
+          "title": "HV Fault Flag Timeline",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "state-timeline",
-            "version": "13.0.1+security-01",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "alignValue": "left",
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "mergeValues": true,
-                "rowHeight": 0.9,
-                "showValue": "auto",
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
               "fieldConfig": {
                 "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "continuous-GrYlRd"
                   },
@@ -159,21 +127,52 @@
                     "insertNulls": false,
                     "lineWidth": 0,
                     "spanNulls": false
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
                   }
                 },
                 "overrides": []
+              },
+              "options": {
+                "alignValue": "left",
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "displayMode": "list",
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "mergeValues": true,
+                "rowHeight": 0.9,
+                "showValue": "auto",
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-10": {
         "kind": "Panel",
         "spec": {
-          "id": 10,
-          "title": "Battery Voltage Module 1-24",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -181,13 +180,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "influxdb",
-                      "version": "v0",
                       "datasource": {
                         "name": "P2A13252C41BAC6F2"
                       },
+                      "group": "influxdb",
+                      "kind": "DataQuery",
                       "spec": {
                         "groupBy": [],
                         "measurement": "battery_vol_module",
@@ -208,58 +207,31 @@
                           {
                             "condition": "AND",
                             "key": "message_type",
-                            "operator": "=",
-                            "value": "wifi"
+                            "operator": "=~",
+                            "value": "/^$type$/"
                           }
                         ]
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 10,
+          "links": [],
+          "title": "Battery Voltage Module 1-24",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.0.1+security-01",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
               "fieldConfig": {
                 "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "palette-classic"
                   },
@@ -296,21 +268,50 @@
                     "thresholdsStyle": {
                       "mode": "off"
                     }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
                   }
                 },
                 "overrides": []
+              },
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "enableFacetedFilter": false,
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-2": {
         "kind": "Panel",
         "spec": {
-          "id": 2,
-          "title": "Main Contractor Status Timeline",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -318,13 +319,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "influxdb",
-                      "version": "v0",
                       "datasource": {
                         "name": "P2A13252C41BAC6F2"
                       },
+                      "group": "influxdb",
+                      "kind": "DataQuery",
                       "spec": {
                         "groupBy": [],
                         "measurement": "battery_hv_main_contractor",
@@ -345,66 +346,36 @@
                           {
                             "key": "message_id",
                             "operator": "=",
-                            "value": "0x800020C"
+                            "value": "0x0800020C"
                           },
                           {
                             "condition": "AND",
                             "key": "message_type",
-                            "operator": "=",
-                            "value": "wifi"
+                            "operator": "=~",
+                            "value": "/^$type$/"
                           }
                         ]
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 2,
+          "links": [],
+          "title": "Main Contractor Status Timeline",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "state-timeline",
-            "version": "13.0.1+security-01",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "alignValue": "left",
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "mergeValues": true,
-                "rowHeight": 0.9,
-                "showValue": "auto",
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
               "fieldConfig": {
                 "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "continuous-GrYlRd"
                   },
@@ -419,21 +390,52 @@
                     "insertNulls": false,
                     "lineWidth": 0,
                     "spanNulls": false
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
                   }
                 },
                 "overrides": []
+              },
+              "options": {
+                "alignValue": "left",
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "displayMode": "list",
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "mergeValues": true,
+                "rowHeight": 0.9,
+                "showValue": "auto",
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-3": {
         "kind": "Panel",
         "spec": {
-          "id": 3,
-          "title": "Motor Contractor Status Timeline",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -441,13 +443,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "influxdb",
-                      "version": "v0",
                       "datasource": {
                         "name": "P2A13252C41BAC6F2"
                       },
+                      "group": "influxdb",
+                      "kind": "DataQuery",
                       "spec": {
                         "groupBy": [],
                         "measurement": "battery_hv_motor_contractor",
@@ -473,61 +475,31 @@
                           {
                             "condition": "AND",
                             "key": "message_type",
-                            "operator": "=",
-                            "value": "wifi"
+                            "operator": "=~",
+                            "value": "/^$type$/"
                           }
                         ]
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 3,
+          "links": [],
+          "title": "Motor Contractor Status Timeline",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "state-timeline",
-            "version": "13.0.1+security-01",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "alignValue": "left",
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "mergeValues": true,
-                "rowHeight": 0.9,
-                "showValue": "auto",
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
               "fieldConfig": {
                 "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "continuous-GrYlRd"
                   },
@@ -542,21 +514,52 @@
                     "insertNulls": false,
                     "lineWidth": 0,
                     "spanNulls": false
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
                   }
                 },
                 "overrides": []
+              },
+              "options": {
+                "alignValue": "left",
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "displayMode": "list",
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "mergeValues": true,
+                "rowHeight": 0.9,
+                "showValue": "auto",
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-4": {
         "kind": "Panel",
         "spec": {
-          "id": 4,
-          "title": "MPPT Status Timeline",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -564,13 +567,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "influxdb",
-                      "version": "v0",
                       "datasource": {
                         "name": "P2A13252C41BAC6F2"
                       },
+                      "group": "influxdb",
+                      "kind": "DataQuery",
                       "spec": {
                         "groupBy": [],
                         "measurement": "battery_hv_mppt_contractor",
@@ -596,61 +599,31 @@
                           {
                             "condition": "AND",
                             "key": "message_type",
-                            "operator": "=",
-                            "value": "wifi"
+                            "operator": "=~",
+                            "value": "/^$type$/"
                           }
                         ]
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 4,
+          "links": [],
+          "title": "MPPT Status Timeline",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "state-timeline",
-            "version": "13.0.1+security-01",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "alignValue": "left",
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "mergeValues": true,
-                "rowHeight": 0.9,
-                "showValue": "auto",
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
               "fieldConfig": {
                 "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "continuous-GrYlRd"
                   },
@@ -665,21 +638,52 @@
                     "insertNulls": false,
                     "lineWidth": 0,
                     "spanNulls": false
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
                   }
                 },
                 "overrides": []
+              },
+              "options": {
+                "alignValue": "left",
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "displayMode": "list",
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "mergeValues": true,
+                "rowHeight": 0.9,
+                "showValue": "auto",
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-5": {
         "kind": "Panel",
         "spec": {
-          "id": 5,
-          "title": "Battery Pack Voltage",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -687,13 +691,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "influxdb",
-                      "version": "v0",
                       "datasource": {
                         "name": "P2A13252C41BAC6F2"
                       },
+                      "group": "influxdb",
+                      "kind": "DataQuery",
                       "spec": {
                         "groupBy": [],
                         "measurement": "battery_pack_voltage",
@@ -714,63 +718,36 @@
                           {
                             "key": "message_id",
                             "operator": "=",
-                            "value": "0x600050C"
+                            "value": "0x0600050C"
                           },
                           {
                             "condition": "AND",
                             "key": "message_type",
-                            "operator": "=",
-                            "value": "wifi"
+                            "operator": "=~",
+                            "value": "/^$type$/"
                           }
                         ]
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 5,
+          "links": [],
+          "title": "Battery Pack Voltage",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.0.1+security-01",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
               "fieldConfig": {
                 "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "palette-classic"
                   },
@@ -807,21 +784,50 @@
                     "thresholdsStyle": {
                       "mode": "off"
                     }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
                   }
                 },
                 "overrides": []
+              },
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "enableFacetedFilter": false,
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-6": {
         "kind": "Panel",
         "spec": {
-          "id": 6,
-          "title": "Battery Pack Current",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -829,13 +835,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "influxdb",
-                      "version": "v0",
                       "datasource": {
                         "name": "P2A13252C41BAC6F2"
                       },
+                      "group": "influxdb",
+                      "kind": "DataQuery",
                       "spec": {
                         "groupBy": [],
                         "measurement": "battery_pack_current",
@@ -856,114 +862,80 @@
                           {
                             "key": "message_id",
                             "operator": "=",
-                            "value": "0x600060C"
+                            "value": "0x0600060C"
                           },
                           {
                             "condition": "AND",
                             "key": "message_type",
-                            "operator": "=",
-                            "value": "wifi"
+                            "operator": "=~",
+                            "value": "/^$type$/"
                           }
                         ]
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 6,
+          "links": [],
+          "title": "Battery Pack Current",
           "vizConfig": {
+            "group": "stat",
             "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "13.0.1+security-01",
             "spec": {
-              "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
               "fieldConfig": {
                 "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
-                        "color": "green"
+                        "color": "green",
+                        "value": 0
                       },
                       {
-                        "value": 80,
-                        "color": "red"
+                        "color": "red",
+                        "value": 80
                       }
                     ]
-                  },
-                  "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisBorderShow": false,
-                    "axisCenteredZero": false,
-                    "axisColorMode": "text",
-                    "axisLabel": "",
-                    "axisPlacement": "auto",
-                    "barAlignment": 0,
-                    "barWidthFactor": 0.6,
-                    "drawStyle": "line",
-                    "fillOpacity": 0,
-                    "gradientMode": "none",
-                    "hideFrom": {
-                      "legend": false,
-                      "tooltip": false,
-                      "viz": false
-                    },
-                    "insertNulls": false,
-                    "lineInterpolation": "linear",
-                    "lineWidth": 1,
-                    "pointSize": 5,
-                    "scaleDistribution": {
-                      "type": "linear"
-                    },
-                    "showPoints": "auto",
-                    "showValues": false,
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "thresholdsStyle": {
-                      "mode": "off"
-                    }
                   }
                 },
                 "overrides": []
+              },
+              "options": {
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-7": {
         "kind": "Panel",
         "spec": {
-          "id": 7,
-          "title": "Battery Average Temperature",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -971,13 +943,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "influxdb",
-                      "version": "v0",
                       "datasource": {
                         "name": "P2A13252C41BAC6F2"
                       },
+                      "group": "influxdb",
+                      "kind": "DataQuery",
                       "spec": {
                         "groupBy": [],
                         "measurement": "battery_avg_temp",
@@ -998,31 +970,56 @@
                           {
                             "key": "message_id",
                             "operator": "=",
-                            "value": "0x600070C"
+                            "value": "0x0600070C"
                           },
                           {
                             "condition": "AND",
                             "key": "message_type",
-                            "operator": "=",
-                            "value": "wifi"
+                            "operator": "=~",
+                            "value": "/^$type$/"
                           }
                         ]
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 7,
+          "links": [],
+          "title": "Battery Average Temperature",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "gauge",
-            "version": "13.0.1+security-01",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "celsius"
+                },
+                "overrides": []
+              },
               "options": {
                 "barShape": "flat",
                 "barWidthFactor": 0.5,
@@ -1050,39 +1047,15 @@
                 "sizing": "auto",
                 "sparkline": true,
                 "textMode": "auto"
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-8": {
         "kind": "Panel",
         "spec": {
-          "id": 8,
-          "title": "Battery Max Temperature",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -1090,13 +1063,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "influxdb",
-                      "version": "v0",
                       "datasource": {
                         "name": "P2A13252C41BAC6F2"
                       },
+                      "group": "influxdb",
+                      "kind": "DataQuery",
                       "spec": {
                         "groupBy": [],
                         "measurement": "battery_max_temp",
@@ -1117,63 +1090,36 @@
                           {
                             "key": "message_id",
                             "operator": "=",
-                            "value": "0x600080C"
+                            "value": "0x0600080C"
                           },
                           {
                             "condition": "AND",
                             "key": "message_type",
-                            "operator": "=",
-                            "value": "wifi"
+                            "operator": "=~",
+                            "value": "/^$type$/"
                           }
                         ]
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 8,
+          "links": [],
+          "title": "Battery Max Temperature",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.0.1+security-01",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
               "fieldConfig": {
                 "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "palette-classic"
                   },
@@ -1210,21 +1156,50 @@
                     "thresholdsStyle": {
                       "mode": "off"
                     }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
                   }
                 },
                 "overrides": []
+              },
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "enableFacetedFilter": false,
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-9": {
         "kind": "Panel",
         "spec": {
-          "id": 9,
-          "title": "SoC",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -1232,13 +1207,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "influxdb",
-                      "version": "v0",
                       "datasource": {
                         "name": "P2A13252C41BAC6F2"
                       },
+                      "group": "influxdb",
+                      "kind": "DataQuery",
                       "spec": {
                         "groupBy": [],
                         "measurement": "battery_soc",
@@ -1259,31 +1234,56 @@
                           {
                             "key": "message_id",
                             "operator": "=",
-                            "value": "0x600090C"
+                            "value": "0x0600090C"
                           },
                           {
                             "condition": "AND",
                             "key": "message_type",
-                            "operator": "=",
-                            "value": "wifi"
+                            "operator": "=~",
+                            "value": "/^$type$/"
                           }
                         ]
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 9,
+          "links": [],
+          "title": "SoC",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "gauge",
-            "version": "13.0.1+security-01",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "percent"
+                },
+                "overrides": []
+              },
               "options": {
                 "barShape": "flat",
                 "barWidthFactor": 0.5,
@@ -1311,29 +1311,9 @@
                 "sizing": "auto",
                 "sparkline": true,
                 "textMode": "auto"
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       }
@@ -1345,131 +1325,131 @@
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 0,
-              "y": 0,
-              "width": 12,
-              "height": 8,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-1"
-              }
+              },
+              "height": 8,
+              "width": 12,
+              "x": 0,
+              "y": 0
             }
           },
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 12,
-              "y": 0,
-              "width": 12,
-              "height": 8,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-2"
-              }
+              },
+              "height": 8,
+              "width": 12,
+              "x": 12,
+              "y": 0
             }
           },
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 0,
-              "y": 8,
-              "width": 12,
-              "height": 8,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-3"
-              }
+              },
+              "height": 8,
+              "width": 12,
+              "x": 0,
+              "y": 8
             }
           },
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 12,
-              "y": 8,
-              "width": 12,
-              "height": 8,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-4"
-              }
+              },
+              "height": 8,
+              "width": 12,
+              "x": 12,
+              "y": 8
             }
           },
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 0,
-              "y": 16,
-              "width": 12,
-              "height": 8,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-5"
-              }
+              },
+              "height": 8,
+              "width": 12,
+              "x": 0,
+              "y": 16
             }
           },
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 12,
-              "y": 16,
-              "width": 12,
-              "height": 8,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-6"
-              }
+              },
+              "height": 8,
+              "width": 12,
+              "x": 12,
+              "y": 16
             }
           },
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 0,
-              "y": 24,
-              "width": 12,
-              "height": 8,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-7"
-              }
+              },
+              "height": 8,
+              "width": 12,
+              "x": 0,
+              "y": 24
             }
           },
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 12,
-              "y": 24,
-              "width": 12,
-              "height": 8,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-8"
-              }
+              },
+              "height": 8,
+              "width": 12,
+              "x": 12,
+              "y": 24
             }
           },
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 0,
-              "y": 32,
-              "width": 12,
-              "height": 8,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-9"
-              }
+              },
+              "height": 8,
+              "width": 12,
+              "x": 0,
+              "y": 32
             }
           },
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 12,
-              "y": 32,
-              "width": 12,
-              "height": 8,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-10"
-              }
+              },
+              "height": 8,
+              "width": 12,
+              "x": 12,
+              "y": 32
             }
           }
         ]
@@ -1477,12 +1457,17 @@
     },
     "links": [],
     "liveNow": false,
+    "preferences": {
+      "layout": {
+        "kind": "GridLayout",
+        "spec": {
+          "items": []
+        }
+      }
+    },
     "preload": false,
     "tags": [],
     "timeSettings": {
-      "timezone": "browser",
-      "from": "now-5m",
-      "to": "now",
       "autoRefresh": "5s",
       "autoRefreshIntervals": [
         "5s",
@@ -1496,18 +1481,33 @@
         "2h",
         "1d"
       ],
+      "fiscalYearStartMonth": 0,
+      "from": "now-5m",
       "hideTimepicker": false,
-      "fiscalYearStartMonth": 0
+      "timezone": "browser",
+      "to": "now"
     },
-    "title": "Wifi - HV BMS",
-    "variables": [],
-    "preferences": {
-      "layout": {
-        "kind": "GridLayout",
+    "title": "HV BMS",
+    "variables": [
+      {
+        "kind": "CustomVariable",
         "spec": {
-          "items": []
+          "allowCustomValue": true,
+          "current": {
+            "text": "cellular",
+            "value": "cellular"
+          },
+          "hide": "dontHide",
+          "includeAll": false,
+          "label": "type",
+          "multi": false,
+          "name": "type",
+          "options": [],
+          "query": "",
+          "skipUrlSync": false,
+          "valuesFormat": "csv"
         }
       }
-    }
+    ]
   }
 }

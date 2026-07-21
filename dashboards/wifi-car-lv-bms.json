@@ -4,19 +4,23 @@
   "metadata": {
     "name": "ad9pv4s",
     "namespace": "default",
-    "uid": "1ebd542c-9ee1-44b9-8e21-07729c38b15b",
-    "resourceVersion": "1780246218999986",
-    "generation": 7,
-    "creationTimestamp": "2026-05-31T16:45:14Z",
+    "uid": "da69199b-5f69-4cb3-ab75-ce7c6ca4b636",
+    "resourceVersion": "1784514091221012",
+    "generation": 2,
+    "creationTimestamp": "2026-07-07T04:02:25Z",
     "labels": {
-      "grafana.app/deprecatedInternalID": "2980033930604544"
+      "grafana.app/deprecatedInternalID": "2687422478626816"
     },
     "annotations": {
-      "grafana.app/createdBy": "user:afmv47jwou5mof",
-      "grafana.app/folder": "",
-      "grafana.app/saved-from-ui": "Grafana v13.0.1+security-01 (9bbe672d)",
-      "grafana.app/updatedBy": "user:afmv47jwou5mof",
-      "grafana.app/updatedTimestamp": "2026-05-31T16:50:18Z"
+      "grafana.app/createdBy": "access-policy:service",
+      "grafana.app/managedBy": "classic-file-provisioning",
+      "grafana.app/managerId": "default",
+      "grafana.app/sourceChecksum": "53858bfed883b9ada83c2a035606e358",
+      "grafana.app/sourcePath": "/var/lib/grafana/dashboards/wifi-car-lv-bms.json",
+      "grafana.app/sourceTimestamp": "1784514086000",
+      "grafana.app/updatedBy": "access-policy:service",
+      "grafana.app/updatedTimestamp": "2026-07-20T02:21:31Z",
+      "grafana.app/folder": ""
     }
   },
   "spec": {
@@ -24,20 +28,20 @@
       {
         "kind": "AnnotationQuery",
         "spec": {
-          "query": {
-            "kind": "DataQuery",
-            "group": "grafana",
-            "version": "v0",
-            "datasource": {
-              "name": "-- Grafana --"
-            },
-            "spec": {}
-          },
+          "builtIn": true,
           "enable": true,
           "hide": true,
           "iconColor": "rgba(0, 211, 255, 1)",
           "name": "Annotations & Alerts",
-          "builtIn": true
+          "query": {
+            "datasource": {
+              "name": "-- Grafana --"
+            },
+            "group": "grafana",
+            "kind": "DataQuery",
+            "spec": {},
+            "version": "v0"
+          }
         }
       }
     ],
@@ -47,10 +51,6 @@
       "panel-1": {
         "kind": "Panel",
         "spec": {
-          "id": 1,
-          "title": "LV Battery Temperature",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -58,13 +58,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "influxdb",
-                      "version": "v0",
                       "datasource": {
                         "name": "P2A13252C41BAC6F2"
                       },
+                      "group": "influxdb",
+                      "kind": "DataQuery",
                       "spec": {
                         "groupBy": [],
                         "measurement": "battery_lv_temp",
@@ -85,31 +85,56 @@
                           {
                             "key": "message_id",
                             "operator": "=",
-                            "value": "0x6000410"
+                            "value": "0x06000410"
                           },
                           {
                             "condition": "AND",
                             "key": "message_type",
-                            "operator": "=",
-                            "value": "wifi"
+                            "operator": "=~",
+                            "value": "/^$type$/"
                           }
                         ]
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 1,
+          "links": [],
+          "title": "LV Battery Temperature",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "gauge",
-            "version": "13.0.1+security-01",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "celsius"
+                },
+                "overrides": []
+              },
               "options": {
                 "barShape": "flat",
                 "barWidthFactor": 0.5,
@@ -137,39 +162,15 @@
                 "sizing": "auto",
                 "sparkline": true,
                 "textMode": "auto"
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-2": {
         "kind": "Panel",
         "spec": {
-          "id": 2,
-          "title": "LV Battery Voltage",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -177,13 +178,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "influxdb",
-                      "version": "v0",
                       "datasource": {
                         "name": "P2A13252C41BAC6F2"
                       },
+                      "group": "influxdb",
+                      "kind": "DataQuery",
                       "spec": {
                         "groupBy": [],
                         "measurement": "battery_lv_volt",
@@ -204,63 +205,36 @@
                           {
                             "key": "message_id",
                             "operator": "=",
-                            "value": "0x6000110"
+                            "value": "0x06000110"
                           },
                           {
                             "condition": "AND",
                             "key": "message_type",
-                            "operator": "=",
-                            "value": "wifi"
+                            "operator": "=~",
+                            "value": "/^$type$/"
                           }
                         ]
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 2,
+          "links": [],
+          "title": "LV Battery Voltage",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.0.1+security-01",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
               "fieldConfig": {
                 "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "palette-classic"
                   },
@@ -297,21 +271,51 @@
                     "thresholdsStyle": {
                       "mode": "off"
                     }
-                  }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "volt"
                 },
                 "overrides": []
+              },
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "enableFacetedFilter": false,
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-3": {
         "kind": "Panel",
         "spec": {
-          "id": 3,
-          "title": "LV Battery Current",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -319,13 +323,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "influxdb",
-                      "version": "v0",
                       "datasource": {
                         "name": "P2A13252C41BAC6F2"
                       },
+                      "group": "influxdb",
+                      "kind": "DataQuery",
                       "spec": {
                         "groupBy": [],
                         "measurement": "battery_lv_current",
@@ -346,63 +350,36 @@
                           {
                             "key": "message_id",
                             "operator": "=",
-                            "value": "0x6000210"
+                            "value": "0x06000210"
                           },
                           {
                             "condition": "AND",
                             "key": "message_type",
-                            "operator": "=",
-                            "value": "wifi"
+                            "operator": "=~",
+                            "value": "/^$type$/"
                           }
                         ]
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 3,
+          "links": [],
+          "title": "LV Battery Current",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.0.1+security-01",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
               "fieldConfig": {
                 "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "palette-classic"
                   },
@@ -439,21 +416,51 @@
                     "thresholdsStyle": {
                       "mode": "off"
                     }
-                  }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "amp"
                 },
                 "overrides": []
+              },
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "enableFacetedFilter": false,
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       },
       "panel-4": {
         "kind": "Panel",
         "spec": {
-          "id": 4,
-          "title": "LV Battery System Current",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -461,13 +468,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "influxdb",
-                      "version": "v0",
                       "datasource": {
                         "name": "P2A13252C41BAC6F2"
                       },
+                      "group": "influxdb",
+                      "kind": "DataQuery",
                       "spec": {
                         "groupBy": [],
                         "measurement": "battery_lv_system_current",
@@ -488,63 +495,36 @@
                           {
                             "key": "message_id",
                             "operator": "=",
-                            "value": "0x6000310"
+                            "value": "0x06000310"
                           },
                           {
                             "condition": "AND",
                             "key": "message_type",
-                            "operator": "=",
-                            "value": "wifi"
+                            "operator": "=~",
+                            "value": "/^$type$/"
                           }
                         ]
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 4,
+          "links": [],
+          "title": "LV Battery System Current",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.0.1+security-01",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
               "fieldConfig": {
                 "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
                   "color": {
                     "mode": "palette-classic"
                   },
@@ -581,11 +561,45 @@
                     "thresholdsStyle": {
                       "mode": "off"
                     }
-                  }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "amp"
                 },
                 "overrides": []
+              },
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "enableFacetedFilter": false,
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
               }
-            }
+            },
+            "version": "13.1.0"
           }
         }
       }
@@ -597,53 +611,53 @@
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 0,
-              "y": 0,
-              "width": 12,
-              "height": 8,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-1"
-              }
+              },
+              "height": 8,
+              "width": 12,
+              "x": 0,
+              "y": 0
             }
           },
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 12,
-              "y": 0,
-              "width": 12,
-              "height": 8,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-2"
-              }
+              },
+              "height": 8,
+              "width": 12,
+              "x": 12,
+              "y": 0
             }
           },
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 0,
-              "y": 8,
-              "width": 12,
-              "height": 8,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-3"
-              }
+              },
+              "height": 8,
+              "width": 12,
+              "x": 0,
+              "y": 8
             }
           },
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 12,
-              "y": 8,
-              "width": 12,
-              "height": 8,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-4"
-              }
+              },
+              "height": 8,
+              "width": 12,
+              "x": 12,
+              "y": 8
             }
           }
         ]
@@ -651,12 +665,17 @@
     },
     "links": [],
     "liveNow": false,
+    "preferences": {
+      "layout": {
+        "kind": "GridLayout",
+        "spec": {
+          "items": []
+        }
+      }
+    },
     "preload": false,
     "tags": [],
     "timeSettings": {
-      "timezone": "browser",
-      "from": "now-6h",
-      "to": "now",
       "autoRefresh": "",
       "autoRefreshIntervals": [
         "5s",
@@ -670,18 +689,33 @@
         "2h",
         "1d"
       ],
+      "fiscalYearStartMonth": 0,
+      "from": "now-6h",
       "hideTimepicker": false,
-      "fiscalYearStartMonth": 0
+      "timezone": "browser",
+      "to": "now"
     },
-    "title": "Wifi - LV BMS",
-    "variables": [],
-    "preferences": {
-      "layout": {
-        "kind": "GridLayout",
+    "title": "LV BMS",
+    "variables": [
+      {
+        "kind": "CustomVariable",
         "spec": {
-          "items": []
+          "allowCustomValue": true,
+          "current": {
+            "text": "cellular",
+            "value": "cellular"
+          },
+          "hide": "dontHide",
+          "includeAll": false,
+          "label": "type",
+          "multi": false,
+          "name": "type",
+          "options": [],
+          "query": "",
+          "skipUrlSync": false,
+          "valuesFormat": "csv"
         }
       }
-    }
+    ]
   }
 }
