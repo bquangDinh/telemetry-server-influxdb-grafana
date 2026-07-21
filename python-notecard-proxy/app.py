@@ -69,54 +69,61 @@ def notecard():
         # Transform data
         body = data.get("body", {})
 
-        payload_hex = body.get("payload", "")
-        payload = bytes.fromhex(payload_hex)
-
-        payload_length = body.get("len", len(payload))
-
-        if payload_length != len(payload):
-            return f"Payload length mismatch: len={payload_length}, actual={len(payload)}", 400
-
         longitude = float(data.get("best_lon", 0.0))
         latitude = float(data.get("best_lat", 0.0))
 
-        decoded_message = DecodedMessage(
-            message_type=1,
-            message_id=int(body.get("id", 0)),
-            length=payload_length,
-            payload=payload,
-            longtitude=longitude,
-            latitude=latitude
-        )
+        # Body is an array with each item of format:
+        # { id: <int>, payload: <hex string>, len: <int> }
 
-        message_bytes = bytearray()
+        for item in body:
+            if "id" not in item or "payload" not in item or "len" not in item:
+                return "Invalid body item format", 400
 
-        message_bytes.append(decoded_message.message_type)
-        message_bytes.extend(struct.pack("<I", decoded_message.message_id))
-        message_bytes.append(decoded_message.length)
-        message_bytes.extend(decoded_message.payload)
-        message_bytes.extend(struct.pack("<ff", decoded_message.longtitude, decoded_message.latitude))
+            message_id = item["id"]
+            payload_hex = item["payload"]
+            length = item["len"]
 
-        udp_socket.sendto(message_bytes, (UDP_IP, UDP_PORT))
+            if length != len(payload_hex):
+                return f"Length mismatch for message ID {message_id}: expected {length}, got {len(payload_hex)}", 400
 
+            # Create a DecodedMessage instance
+            decoded_message = DecodedMessage(
+                message_type=1,
+                message_id=int(message_id, 0),
+                length=length,
+                payload=bytes.fromhex(payload_hex),
+                longtitude=longitude,
+                latitude=latitude
+            )
+
+            message_bytes = bytearray()
+
+            message_bytes.append(decoded_message.message_type)
+            message_bytes.extend(struct.pack("<I", decoded_message.message_id))
+            message_bytes.append(decoded_message.length)
+            message_bytes.extend(decoded_message.payload)
+            message_bytes.extend(struct.pack("<ff", decoded_message.longtitude, decoded_message.latitude))
+
+            udp_socket.sendto(message_bytes, (UDP_IP, UDP_PORT))
+
+        # Send the UDP packet
         print("Forwarded UDP packet:")
         print(json.dumps(data, indent=2))
 
-        formatted_data = {
-            "id": decoded_message.message_id,
-            "len": decoded_message.length,
-            "payload": decoded_message.payload.hex(),
-            "longitude": decoded_message.longtitude,
-            "latitude": decoded_message.latitude
-        }
+        # formatted_data = {
+        #     "id": decoded_message.message_id,
+        #     "len": decoded_message.length,
+        #     "payload": decoded_message.payload.hex(),
+        #     "longitude": decoded_message.longtitude,
+        #     "latitude": decoded_message.latitude
+        # }
 
-        try:
-            route_to_addon_telemetry(formatted_data)
-        except Exception as e:
-            print(f"Error routing telemetry to addon: {e}")
+        # try:
+        #     route_to_addon_telemetry(formatted_data)
+        # except Exception as e:
+        #     print(f"Error routing telemetry to addon: {e}")
 
         return "", 204
-
     except Exception as e:
         print("ERROR:", e)
         return "Internal Server Error", 500
@@ -126,19 +133,19 @@ def health():
     return "OK", 200
 
 def route_to_addon_telemetry(data):
-	try:
-		headers = {
-      		"Authorization": ADDON_TELEMETRY_BEARER_TOKEN,
-			"Content-Type": "application/json"
-      	}
+    try:
+        headers = {
+              "Authorization": ADDON_TELEMETRY_BEARER_TOKEN,
+            "Content-Type": "application/json"
+          }
 
-		response = requests.post(ADDON_TELEMETRY_URL, json=data, headers=headers)
+        response = requests.post(ADDON_TELEMETRY_URL, json=data, headers=headers)
 
-		if response.status_code != 200:
-			print(f"Failed to forward telemetry to addon: {response.status_code} - {response.text}")
-	except Exception as e:
-		print(f"Error forwarding telemetry to addon: {e}")
-		print(f"Error forwarding telemetry to addon: {e}")
+        if response.status_code != 200:
+            print(f"Failed to forward telemetry to addon: {response.status_code} - {response.text}")
+    except Exception as e:
+        print(f"Error forwarding telemetry to addon: {e}")
+        print(f"Error forwarding telemetry to addon: {e}")
 
 # =========================
 # MAIN
