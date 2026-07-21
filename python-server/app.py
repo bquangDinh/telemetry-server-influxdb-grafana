@@ -324,8 +324,14 @@ class UdpServer:
 # =========================
 
 class TelemetryApp:
-    TELEMETRY_NODE_1_TEMP_1 = 0x11
-    TELEMETRY_NODE_1_TEMP_2 = 0x12
+    TELEMETRY_NODE_1_TEMP_1 = 0x00000610
+    TELEMETRY_NODE_1_TEMP_2 = 0x00000611
+    TELEMETRY_MPU6050_ACCER = 0x00000613
+    TELEMETRY_MPU6050_GYRO = 0x00000614
+    TELEMETRY_MPU6050_TEMP = 0x00000615
+
+    TELEMETRY_NODE_2_TEMP_1 = 0x00000620
+    TELEMETRY_NODE_2_TEMP_2 = 0x00000621
 
     DRIVER_CTR_MAIN_HV_SW = 0x2000004
     DRIVER_CTR_MOTOR_HV_SW = 0x2000104
@@ -413,6 +419,11 @@ class TelemetryApp:
         self._handlers: Dict[int, Callable[[DecodedMessage], None]] = {
             self.TELEMETRY_NODE_1_TEMP_1: self._handle_temperature,
             self.TELEMETRY_NODE_1_TEMP_2: self._handle_temperature,
+            self.TELEMETRY_NODE_2_TEMP_1: self._handle_temperature,
+            self.TELEMETRY_NODE_2_TEMP_2: self._handle_temperature,
+            self.TELEMETRY_MPU6050_ACCER: self._handle_compute_accelometer,
+            self.TELEMETRY_MPU6050_GYRO: self._handle_compute_gyroscope,
+            self.TELEMETRY_MPU6050_TEMP: self._handle_compute_mpu6050_temperature,
             self.DRIVER_CTR_MAIN_HV_SW: self._handle_dr_ctrl_main_hv_sw,
             self.DRIVER_CTR_MOTOR_HV_SW: self._handle_dr_ctrl_motor_hv_sw,
             self.DRIVER_CTR_MPPT_HV_SW: self._handle_dr_ctrl_mppt_hv_sw,
@@ -1695,6 +1706,58 @@ class TelemetryApp:
             .tag("message_id", f"0x{msg.message_id:08X}")
             .tag("message_type", msg_type)
             .field("value", mppt_contactor_enabled)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
+    def _handle_compute_accelometer(self, msg: DecodedMessage) -> None:
+        accel_x, accel_y, accel_z = struct.unpack('<fff', msg.payload[:12])
+
+        print(f"[Telemetry] Compute Accelerometer: X={accel_x:.2f} m/s², Y={accel_y:.2f} m/s², Z={accel_z:.2f} m/s²")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("compute_accelerometer")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("accel_x", accel_x)
+            .field("accel_y", accel_y)
+            .field("accel_z", accel_z)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
+    def _handle_compute_gyroscope(self, msg: DecodedMessage) -> None:
+        gyro_x, gyro_y, gyro_z = struct.unpack('<fff', msg.payload[:12])
+
+        print(f"[Telemetry] Compute Gyroscope: X={gyro_x:.2f} °/s, Y={gyro_y:.2f} °/s, Z={gyro_z:.2f} °/s")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("compute_gyroscope")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("gyro_x", gyro_x)
+            .field("gyro_y", gyro_y)
+            .field("gyro_z", gyro_z)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
+    def _handle_compute_mpu6050_temperature(self, msg: DecodedMessage) -> None:
+        mpu_temp = struct.unpack('<f', msg.payload[:4])[0]
+
+        print(f"[Telemetry] Compute MPU6050 Temperature: {mpu_temp:.2f} °C")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("compute_mpu6050_temperature")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", mpu_temp)
         )
 
         self._influx_writer.write_datapoint(point)
