@@ -339,6 +339,10 @@ class TelemetryApp:
 
     REAR_CTRL_MOTOR_RPM = 0x8000008
     REAR_CTRL_VEHICLE_SPEED = 0x4000108
+    REAR_CTRL_MOTOR_IN_REVERSE = 0x208
+    REAR_CTRL_MOTOR_PWR_MODE = 0x308
+    REAR_CTRL_MOTOR_CONTACTOR_ENABLED = 0x408
+    REAR_CTRL_MPPT_CONTACTOR_ENABLED = 0x508
     REAR_CTRL_ARR_VOL_1 = 0xA006408
     REAR_CTRL_ARR_CUR_1 = 0xA006508
     REAR_CTRL_BAT_MEAS_1 = 0xA006608
@@ -357,9 +361,15 @@ class TelemetryApp:
     REAR_CTRL_MPPT_TEMP_4 = 0xA019308
 
     LV_BPS_BAT_VOL = 0x6000110
+    LV_BPS_DCDC_VOL = 0x6000210
+    LV_BPS_LOAD_VOL = 0x6000310
     LV_BPS_BAT_CUR = 0x6000210
     LV_BPS_SYS_CUR = 0x6000310
     LV_BPS_BAT_TEMP = 0x6000410
+    LV_BPS_RELAY_FAULT = 0x6000710
+    LV_BPS_DCDC_FAULT = 0x6000810
+    LV_BPS_BAT_REPLAY = 0x6000910
+    LV_BPS_DCDC_REPLAY = 0x6000A10
 
     HV_BPS_FAULT_FLAGS = 0x400010C
     HV_BPS_MAIN_CONTACTOR_STATUS = 0x800020C
@@ -370,6 +380,8 @@ class TelemetryApp:
     HV_BPS_BAT_AVG_TEMP = 0x600070C
     HV_BPS_BAT_MAX_TEMP = 0x600080C
     HV_BPS_BAT_SOC = 0x600090C
+    HV_ORION_REPLAY_STATE = 0x6000A0C
+    HV_ORION_CAN_MSG_RATE = 0xC000B0C
     HV_BPS_MOD_VOL_1 = 0xC00640C
     HV_BPS_MOD_VOL_2 = 0xC00650C
     HV_BPS_MOD_VOL_3 = 0xC00660C
@@ -412,6 +424,10 @@ class TelemetryApp:
             self.DRIVER_CTR_LEFT_TURN_SW: self._handle_dr_ctrl_left_turn_sw,
             self.REAR_CTRL_MOTOR_RPM: self._handle_rear_ctrl_motor_rpm,
             self.REAR_CTRL_VEHICLE_SPEED: self._handle_rear_ctrl_vehicle_speed,
+            self.REAR_CTRL_MOTOR_IN_REVERSE: self._handle_rear_ctrl_motor_in_reverse,
+            self.REAR_CTRL_MOTOR_PWR_MODE: self._handle_rear_ctrl_motor_pwr_mode,
+            self.REAR_CTRL_MOTOR_CONTACTOR_ENABLED: self._handle_rear_ctrl_motor_contactor_enabled,
+            self.REAR_CTRL_MPPT_CONTACTOR_ENABLED: self._handle_rear_ctrl_mppt_contactor_enabled,
             self.REAR_CTRL_ARR_VOL_1: self._handle_rear_ctrl_arr_vol_1,
             self.REAR_CTRL_ARR_CUR_1: self._handle_rear_ctrl_arr_cur_1,
             self.REAR_CTRL_BAT_MEAS_1: self._handle_rear_ctrl_bat_meas_1,
@@ -429,6 +445,12 @@ class TelemetryApp:
             self.REAR_CTRL_BAT_MEAS_4: self._handle_rear_ctrl_bat_meas_4,
             self.REAR_CTRL_MPPT_TEMP_4: self._handle_rear_ctrl_mppt_temp_4,
             self.LV_BPS_BAT_VOL: self._handle_lv_bps_bat_vol,
+            self.LV_BPS_DCDC_VOL: self._handle_lv_bps_dcdc_vol,
+            self.LV_BPS_LOAD_VOL: self._handle_lv_bps_load_vol,
+            self.LV_BPS_RELAY_FAULT: self._handle_lv_bps_relay_fault,
+            self.LV_BPS_DCDC_FAULT: self._handle_lv_bps_dcdc_fault,
+            self.LV_BPS_BAT_REPLAY: self._handle_lv_bps_bat_relay,
+            self.LV_BPS_DCDC_REPLAY: self._handle_lv_bps_dcdc_relay,
             self.LV_BPS_BAT_CUR: self._handle_lv_bps_bat_cur,
             self.LV_BPS_SYS_CUR: self._handle_lv_bps_sys_cur,
             self.LV_BPS_BAT_TEMP: self._handle_lv_bps_bat_temp,
@@ -441,6 +463,8 @@ class TelemetryApp:
             self.HV_BPS_BAT_AVG_TEMP: self._handle_hv_bps_bat_avg_temp,
             self.HV_BPS_BAT_MAX_TEMP: self._handle_hv_bps_bat_max_temp,
             self.HV_BPS_BAT_SOC: self._handle_hv_bps_bat_soc,
+            self.HV_ORION_REPLAY_STATE: self._handle_hv_orion_replay_state,
+            self.HV_ORION_CAN_MSG_RATE: self._handle_hv_orion_can_msg_rate,
             self.HV_BPS_MOD_VOL_1: self._handle_hv_bps_mod_vol_1,
             self.HV_BPS_MOD_VOL_2: self._handle_hv_bps_mod_vol_2,
             self.HV_BPS_MOD_VOL_3: self._handle_hv_bps_mod_vol_3,
@@ -1473,6 +1497,204 @@ class TelemetryApp:
             .tag("message_type", msg_type)
             .field("module", 24)
             .field("value", bms_vol_24)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
+    def _handle_lv_bps_dcdc_vol(self, msg: DecodedMessage) -> None:
+        lv_dcdc_vol = struct.unpack('<I', msg.payload[:4])[0]
+
+        # Multiple by 0.1 mV to convert to volts
+        lv_dcdc_volts = lv_dcdc_vol * 0.0001
+
+        print(f"[Telemetry] LV BPS DCDC Voltage: {lv_dcdc_volts:.2f} V")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("battery_lv_dcdc_volt")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", lv_dcdc_volts)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
+    def _handle_lv_bps_load_vol(self, msg: DecodedMessage) -> None:
+        lv_load_vol = struct.unpack('<I', msg.payload[:4])[0]
+
+        # Multiple by 0.1 mV to convert to volts
+        lv_load_volts = lv_load_vol * 0.0001
+
+        print(f"[Telemetry] LV BPS Load Voltage: {lv_load_volts:.2f} V")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("battery_lv_load_volt")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", lv_load_volts)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
+    def _handle_lv_bps_relay_fault(self, msg: DecodedMessage) -> None:
+        lv_relay_fault = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] LV BPS Relay Fault: {lv_relay_fault}")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("battery_lv_relay_fault")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", lv_relay_fault)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
+    def _handle_lv_bps_dcdc_fault(self, msg: DecodedMessage) -> None:
+        lv_dcdc_fault = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] LV BPS DCDC Fault: {lv_dcdc_fault}")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("battery_lv_dcdc_fault")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", lv_dcdc_fault)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
+    def _handle_lv_bps_bat_relay(self, msg: DecodedMessage) -> None:
+        lv_bat_relay = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] LV BPS Battery Relay: {lv_bat_relay}")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("battery_lv_bat_relay")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", lv_bat_relay)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
+    def _handle_lv_bps_dcdc_relay(self, msg: DecodedMessage) -> None:
+        lv_dcdc_relay = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] LV BPS DCDC Relay: {lv_dcdc_relay}")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("battery_lv_dcdc_relay")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", lv_dcdc_relay)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
+    def _handle_hv_orion_replay_state(self, msg: DecodedMessage) -> None:
+        hv_orion_replay_state = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV Orion Replay State: {hv_orion_replay_state}")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("battery_hv_orion_replay_state")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", hv_orion_replay_state)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
+    def _handle_hv_orion_can_msg_rate(self, msg: DecodedMessage) -> None:
+        hv_orion_can_msg_rate = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] HV Orion CAN Message Rate: {hv_orion_can_msg_rate}")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("battery_hv_orion_can_msg_rate")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", hv_orion_can_msg_rate)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
+    def _handle_rear_ctrl_motor_in_reverse(self, msg: DecodedMessage) -> None:
+        motor_in_reverse = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] Rear Control Motor in Reverse: {motor_in_reverse}")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("rear_ctrl_motor_in_reverse")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", motor_in_reverse)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
+    def _handle_rear_ctrl_motor_pwr_mode(self, msg: DecodedMessage) -> None:
+        motor_pwr_mode = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] Rear Control Motor Power Mode: {motor_pwr_mode}")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("rear_ctrl_motor_power_mode")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", motor_pwr_mode)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
+    def _handle_rear_ctrl_motor_contactor_enabled(self, msg: DecodedMessage) -> None:
+        motor_contactor_enabled = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] Rear Control Motor Contactor Enabled: {motor_contactor_enabled}")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("rear_ctrl_motor_contactor_enabled")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", motor_contactor_enabled)
+        )
+
+        self._influx_writer.write_datapoint(point)
+
+    def _handle_rear_ctrl_mppt_contactor_enabled(self, msg: DecodedMessage) -> None:
+        mppt_contactor_enabled = struct.unpack('<I', msg.payload[:4])[0]
+
+        print(f"[Telemetry] Rear Control MPPT Contactor Enabled: {mppt_contactor_enabled}")
+
+        msg_type = "wifi" if msg.message_type == 0 else "cellular"
+
+        point = (
+            Point("rear_ctrl_mppt_contactor_enabled")
+            .tag("message_id", f"0x{msg.message_id:08X}")
+            .tag("message_type", msg_type)
+            .field("value", mppt_contactor_enabled)
         )
 
         self._influx_writer.write_datapoint(point)
